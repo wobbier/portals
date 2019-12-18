@@ -1,0 +1,105 @@
+{
+    "Cores": [
+        {
+            "Type": "AudioCore"
+        },
+        {
+            "Type": "PhysicsCore"
+        }
+    ],
+    "Scene": [
+        {
+            "Components": [
+                {
+                    "IsCurrent": true,
+                    "Type": "Camera",
+                    "Zoom": 45.0
+                },
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                }
+            ],
+            "Name": "Main Camera"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "Textures": {
+                                "Diffuse": {
+                                    "Path": "Assets/CubeDiffuse.jpg",
+                                    "RenderMode": "Opaque"
+                                }
+                            },
+                            "Type": "Mesh",
+                            "test": true
+                        }
+                    ],
+                    "Name": "Cube"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        -1.6899999380111694,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        20.0,
+                        1.0,
+                        20.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ModelPath": "Assets/Cube.fbx",
+                    "Type": "Model"
+                },
+                {
+                    "Type": "Rigidbody"
+                }
+            ],
+            "Name": "Cube"
+        }
+    ]
+}
