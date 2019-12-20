@@ -43,7 +43,7 @@
                         {
                             "Position": [
                                 0.0,
-                                0.0,
+                                -1.690000057220459,
                                 0.0
                             ],
                             "Rotation": [
@@ -97,6 +97,130 @@
                 },
                 {
                     "Type": "Rigidbody"
+                }
+            ],
+            "Name": "Cube"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "Textures": {
+                                "Diffuse": {
+                                    "Path": "Assets/CubeDiffuse.jpg",
+                                    "RenderMode": "Opaque"
+                                }
+                            },
+                            "Type": "Mesh",
+                            "test": true
+                        }
+                    ],
+                    "Name": "Cube"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ModelPath": "Assets/Cube.fbx",
+                    "Type": "Model"
+                }
+            ],
+            "Name": "Cube"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "Textures": {
+                                "Diffuse": {
+                                    "Path": "Assets/CubeDiffuse.jpg",
+                                    "RenderMode": "Opaque"
+                                }
+                            },
+                            "Type": "Mesh",
+                            "test": true
+                        }
+                    ],
+                    "Name": "Cube"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        4.369999885559082,
+                        0.9899998903274536,
+                        3.009999990463257
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ModelPath": "Assets/Cube.fbx",
+                    "Type": "Model"
                 }
             ],
             "Name": "Cube"
