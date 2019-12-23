@@ -9,34 +9,6 @@
     ],
     "Scene": [
         {
-            "Components": [
-                {
-                    "IsCurrent": true,
-                    "Type": "Camera",
-                    "Zoom": 45.0
-                },
-                {
-                    "Position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "Rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "Scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "Type": "Transform"
-                }
-            ],
-            "Name": "Main Camera"
-        },
-        {
             "Children": [
                 {
                     "Components": [
@@ -59,6 +31,78 @@
                             "Type": "Transform"
                         },
                         {
+                            "DiffuseColor": [
+                                0.9999899864196777,
+                                0.9999964833259583,
+                                1.0
+                            ],
+                            "Textures": {
+                                "Diffuse": {
+                                    "Path": "Assets/CubeDiffuse.jpg",
+                                    "RenderMode": "Opaque"
+                                }
+                            },
+                            "Type": "Mesh",
+                            "test": true
+                        }
+                    ],
+                    "Name": "Cube"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        2.4547667503356934,
+                        -5.59218692779541,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        20.0,
+                        1.0,
+                        20.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ModelPath": "Assets/Cube.fbx",
+                    "Type": "Model"
+                }
+            ],
+            "Name": "Cube"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "DiffuseColor": [
+                                0.9509803652763367,
+                                0.20511339604854584,
+                                0.20511339604854584
+                            ],
                             "Textures": {
                                 "Diffuse": {
                                     "Path": "Assets/CubeDiffuse.jpg",
@@ -76,8 +120,8 @@
                 {
                     "Position": [
                         0.0,
-                        -1.6899999380111694,
-                        0.0
+                        -1.3287975788116455,
+                        -9.379783630371094
                     ],
                     "Rotation": [
                         0.0,
@@ -85,9 +129,9 @@
                         0.0
                     ],
                     "Scale": [
-                        20.0,
                         1.0,
-                        20.0
+                        1.0,
+                        1.0
                     ],
                     "Type": "Transform"
                 },
@@ -124,6 +168,11 @@
                             "Type": "Transform"
                         },
                         {
+                            "DiffuseColor": [
+                                0.17877738177776337,
+                                0.8463642001152039,
+                                0.9117646813392639
+                            ],
                             "Textures": {
                                 "Diffuse": {
                                     "Path": "Assets/CubeDiffuse.jpg",
@@ -140,9 +189,9 @@
             "Components": [
                 {
                     "Position": [
+                        -2.0899999141693115,
                         0.0,
-                        0.0,
-                        0.0
+                        -11.170000076293945
                     ],
                     "Rotation": [
                         0.0,
@@ -159,18 +208,140 @@
                 {
                     "ModelPath": "Assets/Cube.fbx",
                     "Type": "Model"
+                },
+                {
+                    "Type": "Rigidbody"
                 }
             ],
             "Name": "Cube"
         },
         {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        8.598780632019043,
+                        -14.566145896911621
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "Ambient": [
+                        1.0,
+                        0.9999899864196777,
+                        0.9999899864196777
+                    ],
+                    "Diffuse": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Direction": [
+                        0.0,
+                        -0.6119124889373779,
+                        0.7909254431724548
+                    ],
+                    "Type": "DirectionalLight"
+                }
+            ],
+            "Name": "Light"
+        },
+        {
             "Children": [
                 {
+                    "Children": [
+                        {
+                            "Children": [
+                                {
+                                    "Components": [
+                                        {
+                                            "Position": [
+                                                0.0,
+                                                0.0,
+                                                0.0
+                                            ],
+                                            "Rotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0
+                                            ],
+                                            "Scale": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "Type": "Transform"
+                                        },
+                                        {
+                                            "DiffuseColor": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "Textures": {
+                                                "Diffuse": {
+                                                    "Path": "Assets/Portal Gun (from Portal 2)/textures/portalgun_col.jpg",
+                                                    "RenderMode": "Opaque"
+                                                },
+                                                "Normal": {
+                                                    "Path": "Assets/Portal Gun (from Portal 2)/textures/portalgun_nor.jpg",
+                                                    "RenderMode": "Opaque"
+                                                }
+                                            },
+                                            "Type": "Mesh",
+                                            "test": true
+                                        }
+                                    ],
+                                    "Name": "PortalGun"
+                                }
+                            ],
+                            "Components": [
+                                {
+                                    "Position": [
+                                        0.4399999976158142,
+                                        -0.49000000953674316,
+                                        -1.5099999904632568
+                                    ],
+                                    "Rotation": [
+                                        1.809999942779541,
+                                        -1.4200000762939453,
+                                        -0.7400000095367432
+                                    ],
+                                    "Scale": [
+                                        0.009999999776482582,
+                                        0.009999999776482582,
+                                        0.009999999776482582
+                                    ],
+                                    "Type": "Transform"
+                                },
+                                {
+                                    "ModelPath": "Assets/Portal Gun (from Portal 2)/Portal Gun.fbx",
+                                    "Type": "Model"
+                                }
+                            ],
+                            "Name": "Portal Gun"
+                        }
+                    ],
                     "Components": [
+                        {
+                            "IsCurrent": true,
+                            "Type": "Camera",
+                            "Zoom": 45.0
+                        },
                         {
                             "Position": [
                                 0.0,
-                                0.0,
+                                -0.23000000417232513,
                                 0.0
                             ],
                             "Rotation": [
@@ -184,27 +355,17 @@
                                 1.0
                             ],
                             "Type": "Transform"
-                        },
-                        {
-                            "Textures": {
-                                "Diffuse": {
-                                    "Path": "Assets/CubeDiffuse.jpg",
-                                    "RenderMode": "Opaque"
-                                }
-                            },
-                            "Type": "Mesh",
-                            "test": true
                         }
                     ],
-                    "Name": "Cube"
+                    "Name": "Camera"
                 }
             ],
             "Components": [
                 {
                     "Position": [
-                        4.369999885559082,
-                        0.9899998903274536,
-                        3.009999990463257
+                        0.0,
+                        0.25,
+                        0.0
                     ],
                     "Rotation": [
                         0.0,
@@ -219,11 +380,13 @@
                     "Type": "Transform"
                 },
                 {
-                    "ModelPath": "Assets/Cube.fbx",
-                    "Type": "Model"
+                    "Type": "Rigidbody"
+                },
+                {
+                    "Type": "Character"
                 }
             ],
-            "Name": "Cube"
+            "Name": "Character"
         }
     ]
 }

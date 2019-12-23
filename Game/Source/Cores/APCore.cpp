@@ -102,7 +102,7 @@ void APCore::Update(float dt)
 	Transform& camTransform = m_mainCamera->GetComponent<Transform>();
 	if (m_fracJourney < 1.0f)
 	{
-		camTransform.SetPosition(Mathf::Lerp(camTransform.GetPosition(), Vector3(camTransform.Position.X(), m_currentPosition.Y() + m_cameraHeightOffset, camTransform.Position.Z()), m_fracJourney));
+		camTransform.SetPosition(Mathf::Lerp(camTransform.GetPosition(), Vector3(camTransform.GetPosition().X(), m_currentPosition.Y() + m_cameraHeightOffset, camTransform.GetPosition().Z()), m_fracJourney));
 	}
 	auto Keyboard = Input::GetInstance().GetKeyboardState();
 	auto Controller = Input::GetInstance().GetControllerState();
@@ -190,12 +190,12 @@ void APCore::SpawnNextBlock()
 	block.MoveOnX = !prevBlock.MoveOnX;
 	if (!block.MoveOnX)
 	{
-		transform.SetPosition(prevTransform.Position + Vector3(0.f, (prevTransform.GetScale().Y()) + (.3f), -kStartDistance));
+		transform.SetPosition(prevTransform.GetPosition() + Vector3(0.f, (prevTransform.GetScale().Y()) + (.3f), -kStartDistance));
 		block.BlockDirection = !block.BlockDirection;
 	}
 	else
 	{
-		transform.SetPosition(prevTransform.Position + Vector3(kStartDistance, (prevTransform.GetScale().Y()) + (.3f), 0.f));
+		transform.SetPosition(prevTransform.GetPosition() + Vector3(kStartDistance, (prevTransform.GetScale().Y()) + (.3f), 0.f));
 	}
 
 	for (Transform* child : transform.GetChildren())
