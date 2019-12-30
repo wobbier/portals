@@ -5,6 +5,9 @@
         },
         {
             "Type": "PhysicsCore"
+        },
+        {
+            "Type": "CharacterCore"
         }
     ],
     "Scene": [
@@ -387,6 +390,157 @@
                 }
             ],
             "Name": "Character"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "FilePath": "Assets/Sounds/Ambient/ambience_base.wav",
+                    "Loop": true,
+                    "PlayOnAwake": true,
+                    "Type": "AudioSource"
+                }
+            ],
+            "Name": "Music"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "FilePath": "Assets/UI/CombatHUD.html",
+                    "Type": "BasicUIView"
+                }
+            ],
+            "Name": "UI"
+        },
+        {
+            "Children": [
+                {
+                    "Children": [
+                        {
+                            "Components": [
+                                {
+                                    "Position": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "Type": "Transform"
+                                },
+                                {
+                                    "DiffuseColor": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "Textures": {
+                                        "Diffuse": {
+                                            "Path": "Assets/Models/cube_heart.png",
+                                            "RenderMode": "Opaque"
+                                        }
+                                    },
+                                    "Type": "Mesh",
+                                    "test": true
+                                }
+                            ],
+                            "Name": "Mesh"
+                        }
+                    ],
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                0.10000000149011612,
+                                0.10000000149011612,
+                                0.10000000149011612
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "ModelPath": "Assets/Models/Cube.fbx",
+                            "Type": "Model"
+                        }
+                    ],
+                    "Name": "Cube"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        -1.4499999284744263,
+                        5.679999828338623,
+                        -14.359999656677246
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "Type": "Rigidbody"
+                }
+            ],
+            "Name": "Companion Cube"
         }
     ]
 }
