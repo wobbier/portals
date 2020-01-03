@@ -9,6 +9,7 @@
 #include "Cores/AudioCore.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Mathf.h"
 
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>())
@@ -22,12 +23,34 @@ CharacterCore::CharacterCore()
 
 }
 
+void CharacterCore::Init()
+{
+}
+
 void CharacterCore::OnEntityAdded(Entity& NewEntity)
 {
+	if (m_camera)
+	{
+		BRUH("It looks like we already have one character.");
+		return;
+	}
+
+	m_playerTransform = &NewEntity.GetComponent<Transform>();
+	Transform* camera = m_playerTransform->GetChildByName("Camera");
+	WeakPtr<Entity> cameraEnt = GetEngine().GetWorld().lock()->GetEntity(camera->Parent);
+	m_camera = &cameraEnt.lock()->GetComponent<Camera>();
+	m_cameraTransform = &cameraEnt.lock()->GetComponent<Transform>();
 }
 
 void CharacterCore::OnEntityRemoved(Entity& InEntity)
 {
+}
+
+void CharacterCore::Update(float dt)
+{
+	HandlePortalShots();
+	HandleMouseLook();
+	return;
 }
 
 #if ME_EDITOR
@@ -37,7 +60,7 @@ void CharacterCore::OnEditorInspect()
 }
 #endif
 
-void CharacterCore::Update(float dt)
+void CharacterCore::HandlePortalShots()
 {
 	bool isPrimaryFireDown = Input::GetInstance().GetMouseState().leftButton;
 	if (isPrimaryFireDown && !m_prevPrimaryFireDown)
@@ -54,6 +77,43 @@ void CharacterCore::Update(float dt)
 	m_prevSecondaryFireDown = isSecondaryFireDown;
 }
 
-void CharacterCore::Init()
+void CharacterCore::HandleMouseLook()
 {
+	Vector2 MousePosition = Input::GetInstance().GetMousePosition();
+	if (MousePosition == Vector2(0, 0))
+	{
+		return;
+	}
+
+	if (m_firstUpdate || Input::GetInstance().GetKeyboardState().R)
+	{
+		m_lastX = MousePosition.X();
+		m_lastY = MousePosition.Y();
+		m_firstUpdate = false;
+	}
+
+	float XOffset = MousePosition.X() - m_lastX;
+	float YOffest = m_lastY - MousePosition.Y();
+	m_lastX = MousePosition.X();
+	m_lastY = MousePosition.Y();
+
+	XOffset *= LookSensitivity;
+	YOffest *= LookSensitivity;
+
+	const float Yaw = m_camera->Yaw += XOffset;
+	float Pitch = m_camera->Pitch += YOffest;
+
+	if (Pitch > 89.0f)
+		Pitch = 89.0f;
+	if (Pitch < -89.0f)
+		Pitch = -89.0f;
+
+	Vector3 Front;
+	Front.SetX(cos(Mathf::Radians(Yaw)) * cos(Mathf::Radians(Pitch)));
+	Front.SetY(sin(Mathf::Radians(Pitch)));
+	Front.SetZ(sin(Mathf::Radians(Yaw)) * cos(Mathf::Radians(Pitch)));
+	m_camera->Front = Front.Normalized();
+	//m_playerTransform->Rotation.GetInternalVec().Forward = Front.GetInternalVec();
+	m_cameraTransform->SetRotation(Vector3(Mathf::Radians(Pitch), 0.0f, 0.0f));
+	//m_playerTransform->SetRotation(Vector3(0.0f, Yaw, 0.0f));
 }
