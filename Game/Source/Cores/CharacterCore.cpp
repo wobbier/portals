@@ -108,12 +108,12 @@ void CharacterCore::HandleMouseLook()
 	if (Pitch < -89.0f)
 		Pitch = -89.0f;
 
-	Vector3 Front;
+	/*Vector3 Front;
 	Front.SetX(cos(Mathf::Radians(Yaw)) * cos(Mathf::Radians(Pitch)));
 	Front.SetY(sin(Mathf::Radians(Pitch)));
 	Front.SetZ(sin(Mathf::Radians(Yaw)) * cos(Mathf::Radians(Pitch)));
-	m_camera->Front = Front.Normalized();
+	m_camera->Front = Front.Normalized();*/
 	//m_playerTransform->Rotation.GetInternalVec().Forward = Front.GetInternalVec();
 	m_cameraTransform->SetRotation(Vector3(Mathf::Radians(Pitch), 0.0f, 0.0f));
-	//m_playerTransform->SetRotation(Vector3(0.0f, Yaw, 0.0f));
+	m_playerTransform->SetRotation(Vector3(0.0f, Mathf::Radians(Yaw), 0.0f));
 }
