@@ -10,9 +10,11 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Mathf.h"
+#include "imgui.h"
+#include "Components/Physics/CharacterController.h"
 
 CharacterCore::CharacterCore()
-	: Base(ComponentFilter().Requires<Transform>().Requires<Character>())
+	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
 {
 	m_bluePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_blue1.wav");
 	m_orangePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_red1.wav");
@@ -36,6 +38,7 @@ void CharacterCore::OnEntityAdded(Entity& NewEntity)
 	}
 
 	m_playerTransform = &NewEntity.GetComponent<Transform>();
+	m_controller = &NewEntity.GetComponent<CharacterController>();
 	Transform* camera = m_playerTransform->GetChildByName("Camera");
 	WeakPtr<Entity> cameraEnt = GetEngine().GetWorld().lock()->GetEntity(camera->Parent);
 	m_camera = &cameraEnt.lock()->GetComponent<Camera>();
@@ -49,7 +52,7 @@ void CharacterCore::OnEntityRemoved(Entity& InEntity)
 void CharacterCore::Update(float dt)
 {
 	HandlePortalShots();
-	HandleMouseLook();
+	HandleMouseLook(dt);
 	return;
 }
 
@@ -57,6 +60,7 @@ void CharacterCore::Update(float dt)
 void CharacterCore::OnEditorInspect()
 {
 	Base::OnEditorInspect();
+	ImGui::DragFloat("Movement Speed", &m_movementSpeed);
 }
 #endif
 
@@ -77,7 +81,7 @@ void CharacterCore::HandlePortalShots()
 	m_prevSecondaryFireDown = isSecondaryFireDown;
 }
 
-void CharacterCore::HandleMouseLook()
+void CharacterCore::HandleMouseLook(float dt)
 {
 	Vector2 MousePosition = Input::GetInstance().GetMousePosition();
 	if (MousePosition == Vector2(0, 0))
@@ -118,6 +122,28 @@ void CharacterCore::HandleMouseLook()
 	m_playerTransform->SetRotation(Vector3(0.0f, -Mathf::Radians(Yaw), 0.0f));
 	if (Input::GetInstance().GetKeyboardState().W)
 	{
-		m_playerTransform->SetPosition(m_playerTransform->GetPosition() + Vector3(0.0f, 0.0f, .01f));
+		//m_playerTransform->Translate(Front.Cross(Vector3::Up).Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(Front.Cross(Vector3::Up).Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
+		//m_playerTransform->SetPosition(m_playerTransform->GetPosition() - Vector3(0.0f, 0.0f, m_movementSpeed * dt));
+	}
+	if (Input::GetInstance().GetKeyboardState().S)
+	{
+		//m_playerTransform->Translate(Front.Cross(Vector3::Up).Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(Front.Cross(Vector3::Up).Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
+	}
+
+	if (Input::GetInstance().GetKeyboardState().D)
+	{
+		//m_playerTransform->Translate(Front.Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(Front.Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
+	}
+	if (Input::GetInstance().GetKeyboardState().A)
+	{
+		//m_playerTransform->Translate(Front.Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(Front.Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
+	}
+	if (Input::GetInstance().GetKeyboardState().Space)
+	{
+		m_controller->Jump();
 	}
 }

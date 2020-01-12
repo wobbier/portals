@@ -5,6 +5,7 @@
 class AudioSource;
 class Camera;
 class Transform;
+class CharacterController;
 
 class CharacterCore final
 	: public Core<CharacterCore>
@@ -26,8 +27,10 @@ public:
 #endif
 
 private:
-	void HandleMouseLook();
+	void HandleMouseLook(float dt);
 	void HandlePortalShots();
+
+	float m_movementSpeed = 10.f;
 
 	bool m_prevPrimaryFireDown = false;
 	bool m_prevSecondaryFireDown = false;
@@ -41,6 +44,7 @@ private:
 	Camera* m_camera = nullptr;
 	Transform* m_playerTransform = nullptr;
 	Transform* m_cameraTransform = nullptr;
+	CharacterController* m_controller = nullptr;
 };
 
 ME_REGISTER_CORE(CharacterCore)

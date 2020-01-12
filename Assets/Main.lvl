@@ -4,10 +4,10 @@
             "Type": "AudioCore"
         },
         {
-            "Type": "PhysicsCore"
+            "Type": "CharacterCore"
         },
         {
-            "Type": "CharacterCore"
+            "Type": "PhysicsCore"
         }
     ],
     "Scene": [
@@ -56,7 +56,7 @@
                 {
                     "Position": [
                         2.4547667503356934,
-                        -5.59218692779541,
+                        -18.39218521118164,
                         0.0
                     ],
                     "Rotation": [
@@ -143,6 +143,11 @@
                     "Type": "Model"
                 },
                 {
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
                     "Type": "Rigidbody"
                 }
             ],
@@ -192,9 +197,9 @@
             "Components": [
                 {
                     "Position": [
-                        -2.0899999141693115,
-                        0.0,
-                        -11.170000076293945
+                        -0.10999999940395355,
+                        1.0299999713897705,
+                        -9.289999961853027
                     ],
                     "Rotation": [
                         0.0,
@@ -213,6 +218,11 @@
                     "Type": "Model"
                 },
                 {
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
                     "Type": "Rigidbody"
                 }
             ],
@@ -338,6 +348,7 @@
                     "Components": [
                         {
                             "IsCurrent": true,
+                            "Skybox": "Assets/Textures/Skybox/skybox.jpg",
                             "Type": "Camera",
                             "Zoom": 45.0
                         },
@@ -383,10 +394,14 @@
                     "Type": "Transform"
                 },
                 {
-                    "Type": "Rigidbody"
+                    "Type": "Character"
                 },
                 {
-                    "Type": "Character"
+                    "Deceleration": 0.10000000149011612,
+                    "JumpForce": 20.0,
+                    "JumpRechargeTime": 0.5,
+                    "MaxSpeed": 5.0,
+                    "Type": "CharacterController"
                 }
             ],
             "Name": "Character"
@@ -414,7 +429,7 @@
                 {
                     "FilePath": "Assets/Sounds/Ambient/ambience_base.wav",
                     "Loop": true,
-                    "PlayOnAwake": true,
+                    "PlayOnAwake": false,
                     "Type": "AudioSource"
                 }
             ],
@@ -537,6 +552,11 @@
                     "Type": "Transform"
                 },
                 {
+                    "Scale": [
+                        1.75,
+                        1.75,
+                        1.75
+                    ],
                     "Type": "Rigidbody"
                 }
             ],
