@@ -1,7 +1,7 @@
 #include "PCH.h"
 #include "App.h"
 #include "ComponentRegistry.h"
-#include "StackGame.h"
+#include "PortalsGame.h"
 
 #include <ppltasks.h>
 #include "Renderer.h"
@@ -35,7 +35,7 @@ void App::Initialize(CoreApplicationView^ applicationView)
 
 	// At this point we have access to the device. 
 
-	m_main = std::make_unique<StackGame>();
+	m_main = std::make_unique<PortalsGame>();
 }
 
 // Called when the CoreWindow object is created (or re-created).

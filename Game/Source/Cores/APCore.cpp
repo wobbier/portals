@@ -104,8 +104,8 @@ void APCore::Update(float dt)
 	{
 		camTransform.SetPosition(Mathf::Lerp(camTransform.GetPosition(), Vector3(camTransform.GetPosition().X(), m_currentPosition.Y() + m_cameraHeightOffset, camTransform.GetPosition().Z()), m_fracJourney));
 	}
-	auto Keyboard = Input::GetInstance().GetKeyboardState();
-	auto Controller = Input::GetInstance().GetControllerState();
+	auto Keyboard = GetEngine().GetInput().GetKeyboardState();
+	auto Controller = GetEngine().GetInput().GetControllerState();
 	if (!m_isKeyPressed && (Keyboard.P || Controller.buttons.y))
 	{
 		auto entities = GetEntities();

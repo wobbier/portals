@@ -34,7 +34,7 @@ void PortalsGame::OnStart()
 
 void PortalsGame::OnUpdate(float DeltaTime)
 {
-	Input& Instance = Input::GetInstance();
+	Input& Instance = GetEngine().GetInput();
 }
 
 void PortalsGame::OnEnd()
@@ -46,7 +46,7 @@ void PortalsGame::OnInitialize()
 	NewSceneEvent evt;
 	evt.Fire();
 	GetEngine().GetWorld().lock()->Start();
-	GetEngine().LoadScene("Assets/Test.lvl");
+	GetEngine().LoadScene("Assets/Main.lvl");
 	GetEngine().GetWorld().lock()->Simulate();
 	GetEngine().GetWorld().lock()->Start();
 }
