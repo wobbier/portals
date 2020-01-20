@@ -16,6 +16,8 @@
 #include "Cores/PhysicsCore.h"
 #include "Cores/SceneGraph.h"
 #include "Components/Graphics/Model.h"
+#include "Components/Physics/Rigidbody.h"
+#include "Components/Graphics/Mesh.h"
 
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
@@ -23,10 +25,22 @@ CharacterCore::CharacterCore()
 	m_bluePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_blue1.wav");
 	m_orangePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_red1.wav");
 
+	m_invalidPortalSounds.reserve(4);
+	for (int i = 0; i < 4; ++i)
+	{
+		m_invalidPortalSounds.push_back(new AudioSource("Assets/Sounds/Gun/portal_invalid_surface_0" + std::to_string(i+1) + ".wav"));
+	}
+
 	AudioCore* audioCore = static_cast<AudioCore*>(GetEngine().GetWorld().lock()->GetCore(AudioCore::GetTypeId()));
 	audioCore->InitComponent(*m_bluePortalShot);
 	audioCore->InitComponent(*m_orangePortalShot);
 
+	for (int i = 0; i < 4; ++i)
+	{
+		AudioSource* source = new AudioSource("Assets/Sounds/Gun/portal_invalid_surface_0" + std::to_string(i + 1) + ".wav");
+		m_invalidPortalSounds.push_back(source);
+		audioCore->InitComponent(*source);
+	}
 }
 
 void CharacterCore::Init()
@@ -74,15 +88,28 @@ void CharacterCore::HandlePortalShots()
 	bool isPrimaryFireDown = input.GetMouseState().leftButton;
 	if (isPrimaryFireDown && !m_prevPrimaryFireDown)
 	{
-		m_bluePortalShot->Play(false);
-		FirePortal();
+		if (FirePortal(true))
+		{
+			m_bluePortalShot->Play(false);
+		}
+		else
+		{
+			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size()-1)]->Play();
+		}
 	}
 	m_prevPrimaryFireDown = isPrimaryFireDown;
 
 	bool isSecondaryFireDown = input.GetMouseState().rightButton;
 	if (isSecondaryFireDown && !m_prevSecondaryFireDown)
 	{
-		m_orangePortalShot->Play(false);
+		if (FirePortal(false))
+		{
+			m_orangePortalShot->Play(false);
+		}
+		else
+		{
+			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size()-1)]->Play();
+		}
 	}
 	m_prevSecondaryFireDown = isSecondaryFireDown;
 }
@@ -172,24 +199,93 @@ void CharacterCore::HandleMouseLook(float dt)
 	//MousePosition = GetEngine().GetInput().GetMousePosition();
 }
 
-void CharacterCore::FirePortal()
+bool CharacterCore::FirePortal(bool IsBluePortal)
 {
 	auto world = GetEngine().GetWorld().lock();
 	PhysicsCore* physics = static_cast<PhysicsCore*>(world->GetCore(PhysicsCore::GetTypeId()));
 
+	std::vector<Vector3> directions = {
+		{1.f, 0.f, 0.f}, // right
+		{-1.f, 0.f, 0.f}, // left
+		{0.f, 1.f, 0.f}, // up
+		{0.f, -1.f, 0.f}, // down
+	};
+	bool canFitPortal = true;
 	RaycastHit ray;
 	if (physics->Raycast(m_cameraTransform->GetWorldPosition(), m_cameraTransform->GetWorldPosition() + m_camera->Front * 20.0f, ray))
 	{
 		auto ent = world->GetEntity(ray.What->Parent);
 		Transform& trans = ent.lock()->GetComponent<Transform>();
 		BRUH("HIT" + trans.Name);
+		
+		for (int i = 0; i < directions.size(); ++i)
+		{
+			Vector3 position = ray.Position + directions[i].Cross(ray.Normal).Cross(-ray.Normal).Normalized();
+			RaycastHit boundsRay;
+			canFitPortal = canFitPortal && (physics->Raycast(position + ray.Normal, position - ray.Normal * 20.0f, boundsRay));
+		}
+	}
+	else
+	{
+		canFitPortal = false;
+	}
+
+	if (canFitPortal)
+	{
+		for (int i = 0; i < directions.size(); ++i)
+		{
+			auto hitEnt = world->CreateEntity().lock();
+			Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalBounds");
+			hitEntTransform.SetWorldPosition(ray.Position + directions[i].Cross(ray.Normal).Cross(-ray.Normal).Normalized());
+			hitEntTransform.SetScale(0.1f);
+			hitEnt->AddComponent<Model>("Assets/Cube.fbx");
+		}
 
 		auto hitEnt = world->CreateEntity().lock();
 		Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
 		hitEntTransform.SetWorldPosition(ray.Position);
-		hitEntTransform.SetScale(0.1f);
+		hitEntTransform.SetScale(Vector3(1.f, 1.f, 0.01f));
+
+		DirectX::SimpleMath::Matrix mat;
+		mat = mat.CreateLookAt(ray.Position.GetInternalVec(), (ray.Position + ray.Normal).GetInternalVec(), Vector3::Up.GetInternalVec());// directions[3].Cross(ray.Normal).Cross(-ray.Normal).Normalized().GetInternalVec());
+		DirectX::SimpleMath::Quaternion dxQuat;
+		DirectX::SimpleMath::Vector3 vecPos;
+		DirectX::SimpleMath::Vector3 vecScale;
+		mat.Decompose(vecPos, dxQuat, vecScale);
+		Quaternion quat = Quaternion(dxQuat);
+		hitEntTransform.SetRotation(Quaternion::ToEulerAngles(quat));
+		//hitEntTransform.SetRotation(ray.Normal);
+
 		hitEnt->AddComponent<Model>("Assets/Cube.fbx");
+		Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
+		rigidbody.SetMass(0.f);
+		auto children = hitEntTransform.GetChildren();
+		for (auto child : children)
+		{
+			SharedPtr<Entity> portalEnt = world->GetEntity(child->Parent).lock();
+			if (portalEnt->HasComponent<Mesh>())
+			{
+				Mesh& meshComp = portalEnt->GetComponent<Mesh>();
+
+				if (IsBluePortal)
+				{
+					meshComp.MeshMaterial->DiffuseColor = {
+								0.17877738177776337f,
+								0.8463642001152039f,
+								0.9117646813392639f };
+				}
+				else
+				{
+					meshComp.MeshMaterial->DiffuseColor = {
+								0.9509803652763367f,
+								0.20511339604854584f,
+								0.20511339604854584f };
+				}
+			}
+		}
 	}
+
+	return canFitPortal;
 }
 
 void CharacterCore::OnStart()

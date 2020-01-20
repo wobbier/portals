@@ -18,7 +18,7 @@
                         {
                             "Position": [
                                 0.0,
-                                -1.690000057220459,
+                                0.0,
                                 0.0
                             ],
                             "Rotation": [
@@ -41,10 +41,14 @@
                             ],
                             "Textures": {
                                 "Diffuse": {
-                                    "Path": "Assets/CubeDiffuse.jpg",
+                                    "Path": "Assets/Textures/512x512.png",
                                     "RenderMode": "Opaque"
                                 }
                             },
+                            "Tiling": [
+                                -5.0,
+                                -5.0
+                            ],
                             "Type": "Mesh",
                             "test": true
                         }
@@ -56,7 +60,7 @@
                 {
                     "Position": [
                         2.4547667503356934,
-                        -18.39218521118164,
+                        -19.582185745239258,
                         0.0
                     ],
                     "Rotation": [
@@ -122,6 +126,10 @@
                                     "RenderMode": "Opaque"
                                 }
                             },
+                            "Tiling": [
+                                1.0,
+                                1.0
+                            ],
                             "Type": "Mesh",
                             "test": true
                         }
@@ -199,6 +207,10 @@
                                     "RenderMode": "Opaque"
                                 }
                             },
+                            "Tiling": [
+                                1.0,
+                                1.0
+                            ],
                             "Type": "Mesh",
                             "test": true
                         }
@@ -325,6 +337,10 @@
                                                     "RenderMode": "Opaque"
                                                 }
                                             },
+                                            "Tiling": [
+                                                1.0,
+                                                1.0
+                                            ],
                                             "Type": "Mesh",
                                             "test": true
                                         }
@@ -415,7 +431,7 @@
                     "JumpForce": 20.0,
                     "JumpRechargeTime": 0.5,
                     "MaxSpeed": 5.0,
-                    "StepHeight": 0.009999999776482582,
+                    "StepHeight": 1.0,
                     "Type": "CharacterController"
                 }
             ],
@@ -513,6 +529,10 @@
                                             "RenderMode": "Opaque"
                                         }
                                     },
+                                    "Tiling": [
+                                        1.0,
+                                        1.0
+                                    ],
                                     "Type": "Mesh",
                                     "test": true
                                 }
@@ -603,16 +623,20 @@
                         },
                         {
                             "DiffuseColor": [
-                                0.7352941036224365,
-                                0.7352867126464844,
-                                0.7352867126464844
+                                1.0,
+                                0.9999899864196777,
+                                0.9999899864196777
                             ],
                             "Textures": {
                                 "Diffuse": {
-                                    "Path": "Assets/CubeDiffuse.jpg",
+                                    "Path": "Assets/Textures/512x512.png",
                                     "RenderMode": "Opaque"
                                 }
                             },
+                            "Tiling": [
+                                -1.0,
+                                -1.0
+                            ],
                             "Type": "Mesh",
                             "test": true
                         }
@@ -624,7 +648,7 @@
                 {
                     "Position": [
                         0.0,
-                        -14.119999885559082,
+                        -13.010000228881836,
                         -28.249998092651367
                     ],
                     "Rotation": [
