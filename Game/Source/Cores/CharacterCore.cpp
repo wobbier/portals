@@ -166,8 +166,8 @@ void CharacterCore::HandleMouseLook(float dt)
 		Front.SetY(sin(Mathf::Radians(Pitch)));
 		Front.SetZ(sin(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
 		m_camera->Front = Front.Normalized();
-		m_cameraTransform->SetRotation(Vector3(Mathf::Radians(Pitch), 0.0f, 0.0f));
-		m_playerTransform->SetRotation(Vector3(0.0f, -Mathf::Radians(Yaw), 0.0f));
+		m_cameraTransform->SetRotation(Vector3(Pitch, 0.0f, 0.0f));
+		m_playerTransform->SetRotation(Vector3(0.0f, -Yaw, 0.0f));
 
 		m_previousMouseState = currentState;
 	}
@@ -210,6 +210,9 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		{0.f, 1.f, 0.f}, // up
 		{0.f, -1.f, 0.f}, // down
 	};
+
+	std::vector<Vector3> directionsHit;
+	directionsHit.reserve(4);
 	bool canFitPortal = true;
 	RaycastHit ray;
 	if (physics->Raycast(m_cameraTransform->GetWorldPosition(), m_cameraTransform->GetWorldPosition() + m_camera->Front * 20.0f, ray))
@@ -220,9 +223,10 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		
 		for (int i = 0; i < directions.size(); ++i)
 		{
-			Vector3 position = ray.Position + directions[i].Cross(ray.Normal).Cross(-ray.Normal).Normalized();
+			Vector3 position = ray.Position + directions[i].Cross(ray.Normal).Normalized();
 			RaycastHit boundsRay;
 			canFitPortal = canFitPortal && (physics->Raycast(position + ray.Normal, position - ray.Normal * 20.0f, boundsRay));
+			directionsHit.push_back(boundsRay.Position);
 		}
 	}
 	else
@@ -232,11 +236,19 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 
 	if (canFitPortal)
 	{
-		for (int i = 0; i < directions.size(); ++i)
+		for (int i = 0; i < directionsHit.size(); ++i)
 		{
 			auto hitEnt = world->CreateEntity().lock();
 			Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalBounds");
-			hitEntTransform.SetWorldPosition(ray.Position + directions[i].Cross(ray.Normal).Cross(-ray.Normal).Normalized());
+			hitEntTransform.SetWorldPosition(directionsHit[i]);
+			hitEntTransform.SetScale(0.1f);
+			hitEnt->AddComponent<Model>("Assets/Cube.fbx");
+		}
+
+		{
+			auto hitEnt = world->CreateEntity().lock();
+			Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalNormal");
+			hitEntTransform.SetWorldPosition(ray.Position + ray.Normal);
 			hitEntTransform.SetScale(0.1f);
 			hitEnt->AddComponent<Model>("Assets/Cube.fbx");
 		}
@@ -244,16 +256,9 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		auto hitEnt = world->CreateEntity().lock();
 		Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
 		hitEntTransform.SetWorldPosition(ray.Position);
-		hitEntTransform.SetScale(Vector3(1.f, 1.f, 0.01f));
+		hitEntTransform.SetScale(Vector3(2.f, 2.5f, 0.01f));
 
-		DirectX::SimpleMath::Matrix mat;
-		mat = mat.CreateLookAt(ray.Position.GetInternalVec(), (ray.Position + ray.Normal).GetInternalVec(), Vector3::Up.GetInternalVec());// directions[3].Cross(ray.Normal).Cross(-ray.Normal).Normalized().GetInternalVec());
-		DirectX::SimpleMath::Quaternion dxQuat;
-		DirectX::SimpleMath::Vector3 vecPos;
-		DirectX::SimpleMath::Vector3 vecScale;
-		mat.Decompose(vecPos, dxQuat, vecScale);
-		Quaternion quat = Quaternion(dxQuat);
-		hitEntTransform.SetRotation(Quaternion::ToEulerAngles(quat));
+		hitEntTransform.LookAt(ray.Normal);
 		//hitEntTransform.SetRotation(ray.Normal);
 
 		hitEnt->AddComponent<Model>("Assets/Cube.fbx");
