@@ -2,7 +2,6 @@
 #include "Components/Physics/Rigidbody.h"
 #include "Graphics/Texture.h"
 #include "Resource/ResourceCache.h"
-#include "Components/UI/Text.h"
 #include "Components/GameUIView.h"
 #include "Components/Audio/AudioSource.h"
 

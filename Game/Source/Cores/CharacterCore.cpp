@@ -18,6 +18,7 @@
 #include "Components/Graphics/Model.h"
 #include "Components/Physics/Rigidbody.h"
 #include "Components/Graphics/Mesh.h"
+#include "Components/Portal.h"
 
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
@@ -122,7 +123,7 @@ void CharacterCore::HandleMouseLook(float dt)
 	//	return;
 	//}
 
-	Vector2 newPos = GetEngine().MainCamera.OutputSize / 2.f;
+	Vector2 newPos = m_camera->OutputSize / 2.f;
 
 	DirectX::Mouse::State currentState = GetEngine().GetInput().GetMouseState();
 	if (m_firstUpdate || m_previousMouseState.positionMode != currentState.positionMode || GetEngine().GetInput().GetKeyboardState().R)
@@ -236,22 +237,22 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 
 	if (canFitPortal)
 	{
-		for (int i = 0; i < directionsHit.size(); ++i)
-		{
-			auto hitEnt = world->CreateEntity().lock();
-			Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalBounds");
-			hitEntTransform.SetWorldPosition(directionsHit[i]);
-			hitEntTransform.SetScale(0.1f);
-			hitEnt->AddComponent<Model>("Assets/Cube.fbx");
-		}
+		//for (int i = 0; i < directionsHit.size(); ++i)
+		//{
+		//	auto hitEnt = world->CreateEntity().lock();
+		//	Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalBounds");
+		//	hitEntTransform.SetWorldPosition(directionsHit[i]);
+		//	hitEntTransform.SetScale(0.1f);
+		//	hitEnt->AddComponent<Model>("Assets/Cube.fbx");
+		//}
 
-		{
-			auto hitEnt = world->CreateEntity().lock();
-			Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalNormal");
-			hitEntTransform.SetWorldPosition(ray.Position + ray.Normal);
-			hitEntTransform.SetScale(0.1f);
-			hitEnt->AddComponent<Model>("Assets/Cube.fbx");
-		}
+		//{
+		//	auto hitEnt = world->CreateEntity().lock();
+		//	Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalNormal");
+		//	hitEntTransform.SetWorldPosition(ray.Position + ray.Normal);
+		//	hitEntTransform.SetScale(0.1f);
+		//	hitEnt->AddComponent<Model>("Assets/Cube.fbx");
+		//}
 
 		auto hitEnt = world->CreateEntity().lock();
 		Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
@@ -259,7 +260,7 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		hitEntTransform.SetScale(Vector3(2.f, 2.5f, 0.01f));
 
 		hitEntTransform.LookAt(ray.Normal);
-		//hitEntTransform.SetRotation(ray.Normal);
+		hitEnt->AddComponent<Portal>(IsBluePortal ? Portal::PortalType::Blue : Portal::PortalType::Orange);
 
 		hitEnt->AddComponent<Model>("Assets/Cube.fbx");
 		Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
@@ -288,6 +289,9 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 				}
 			}
 		}
+
+		//hitEntTransform.SetRotation(ray.Normal);
+
 	}
 
 	return canFitPortal;
@@ -296,4 +300,5 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 void CharacterCore::OnStart()
 {
 	GetEngine().GetInput().SetMouseCapture(true);
+
 }

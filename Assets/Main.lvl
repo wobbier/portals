@@ -8,6 +8,9 @@
         },
         {
             "Type": "PhysicsCore"
+        },
+        {
+            "Type": "PortalManagerCore"
         }
     ],
     "Scene": [
@@ -424,15 +427,15 @@
                     "Type": "Transform"
                 },
                 {
+                    "Type": "Character"
+                },
+                {
                     "Deceleration": 0.10000000149011612,
                     "JumpForce": 20.0,
                     "JumpRechargeTime": 0.5,
                     "MaxSpeed": 5.0,
                     "StepHeight": 1.0,
                     "Type": "CharacterController"
-                },
-                {
-                    "Type": "Character"
                 }
             ],
             "Name": "Character"
