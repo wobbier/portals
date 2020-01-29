@@ -6,6 +6,10 @@
 #include "Components/Camera.h"
 #include "Components/Transform.h"
 #include "Engine/World.h"
+#include "Components/Graphics/Mesh.h"
+#include "Graphics/Texture.h"
+#include "Camera/CameraData.h"
+#include "Renderer.h"
 
 PortalManagerCore::PortalManagerCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Portal>())
@@ -30,11 +34,49 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 	switch (portalComponent.Type)
 	{
 	case Portal::PortalType::Blue:
+	{
 		BluePortal = NewEntity;
+
+		auto children = BluePortal.GetComponent<Transform>().GetChildren();
+		for (auto child : children)
+		{
+			SharedPtr<Entity> portalEnt = world->GetEntity(child->Parent).lock();
+			if (portalEnt->HasComponent<Mesh>())
+			{
+				Mesh& meshComp = portalEnt->GetComponent<Mesh>();
+
+				Camera& cam = BluePortalCamera->GetComponent<Camera>();
+					
+				Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
+				BluePortalTexture->UpdateBuffer(CamData.Buffer);
+
+				meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
+			}
+		}
+	}
 		break;
 	case Portal::PortalType::Orange:
 	default:
+	{
 		OrangePortal = NewEntity;
+
+		auto children = OrangePortal.GetComponent<Transform>().GetChildren();
+		for (auto child : children)
+		{
+			SharedPtr<Entity> portalEnt = world->GetEntity(child->Parent).lock();
+			if (portalEnt->HasComponent<Mesh>())
+			{
+				Mesh& meshComp = portalEnt->GetComponent<Mesh>();
+
+				Camera& cam = OrangePortalCamera->GetComponent<Camera>();
+
+				Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
+				OrangePortalTexture->UpdateBuffer(CamData.Buffer);
+
+				meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
+			}
+		}
+	}
 		break;
 
 	}
@@ -73,12 +115,14 @@ void PortalManagerCore::OnStart()
 		Transform& portalCamera = BluePortalCamera->AddComponent<Transform>("Blue Portal Camera");
 		portalCamera.SetPosition(Vector3(0, 5, -10));
 		BluePortalCamera->AddComponent<Camera>();
+		BluePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
 	}
 	{
 		OrangePortalCamera = world->CreateEntity().lock();
 		Transform& portalCamera = OrangePortalCamera->AddComponent<Transform>("Orange Portal Camera");
 		portalCamera.SetPosition(Vector3(0, 5, -10));
 		OrangePortalCamera->AddComponent<Camera>();
+		OrangePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
 	}
 }
 

@@ -273,20 +273,7 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 			{
 				Mesh& meshComp = portalEnt->GetComponent<Mesh>();
 
-				if (IsBluePortal)
-				{
-					meshComp.MeshMaterial->DiffuseColor = {
-								0.17877738177776337f,
-								0.8463642001152039f,
-								0.9117646813392639f };
-				}
-				else
-				{
-					meshComp.MeshMaterial->DiffuseColor = {
-								0.9509803652763367f,
-								0.20511339604854584f,
-								0.20511339604854584f };
-				}
+				meshComp.MeshMaterial->DiffuseColor = { 1.f, 1.f, 1.f };
 			}
 		}
 

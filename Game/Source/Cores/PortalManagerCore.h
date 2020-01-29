@@ -4,6 +4,8 @@
 #include "Pointers.h"
 #include "Components/Transform.h"
 
+namespace Moonlight { class Texture; }
+
 class PortalManagerCore
 	: public Core<PortalManagerCore>
 {
@@ -32,6 +34,9 @@ private:
 
 	Entity BluePortal;
 	Entity OrangePortal;
+
+	SharedPtr<Moonlight::Texture> BluePortalTexture;
+	SharedPtr<Moonlight::Texture> OrangePortalTexture;
 };
 
 ME_REGISTER_CORE(PortalManagerCore)
