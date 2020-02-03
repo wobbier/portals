@@ -19,6 +19,9 @@
 #include "Components/Physics/Rigidbody.h"
 #include "Components/Graphics/Mesh.h"
 #include "Components/Portal.h"
+#include "Graphics/ShaderCommand.h"
+#include "Graphics/Material.h"
+#include "RenderCommands.h"
 
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
@@ -256,29 +259,28 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 
 		auto hitEnt = world->CreateEntity().lock();
 		Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
-		hitEntTransform.SetWorldPosition(ray.Position);
+		hitEntTransform.SetWorldPosition(ray.Position + (ray.Normal * .01f));
 		hitEntTransform.SetScale(Vector3(2.f, 2.5f, 0.01f));
 
-		hitEntTransform.LookAt(ray.Normal);
-		hitEnt->AddComponent<Portal>(IsBluePortal ? Portal::PortalType::Blue : Portal::PortalType::Orange);
+		if (ray.Normal.Y() >= 0.98f)
+		{
+			hitEntTransform.SetRotation(Vector3(90.f, m_playerTransform->GetRotation().Y(), 0.f));
+		}
+		else
+		{
+			hitEntTransform.LookAt(ray.Normal);
+		}
+		Portal& portal = hitEnt->AddComponent<Portal>(IsBluePortal ? Portal::PortalType::Blue : Portal::PortalType::Orange);
+		portal.Observer = m_cameraTransform;
 
-		hitEnt->AddComponent<Model>("Assets/Cube.fbx");
 		Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
 		rigidbody.SetMass(0.f);
-		auto children = hitEntTransform.GetChildren();
-		for (auto child : children)
-		{
-			SharedPtr<Entity> portalEnt = world->GetEntity(child->Parent).lock();
-			if (portalEnt->HasComponent<Mesh>())
-			{
-				Mesh& meshComp = portalEnt->GetComponent<Mesh>();
 
-				meshComp.MeshMaterial->DiffuseColor = { 1.f, 1.f, 1.f };
-			}
-		}
+		Moonlight::Material* mat = new Moonlight::Material();
+		Moonlight::ShaderCommand* shader = new Moonlight::ShaderCommand("Assets/Shaders/ScreenSpaceShader.hlsl");
+		Mesh& meshComp = hitEnt->AddComponent<Mesh>(Moonlight::MeshType::Plane, mat, shader);
 
-		//hitEntTransform.SetRotation(ray.Normal);
-
+		meshComp.MeshMaterial->DiffuseColor = { 1.f, 1.f, 1.f };
 	}
 
 	return canFitPortal;

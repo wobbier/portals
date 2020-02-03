@@ -37,48 +37,38 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 	{
 		BluePortal = NewEntity;
 
-		auto children = BluePortal.GetComponent<Transform>().GetChildren();
-		for (auto child : children)
+		if (BluePortal.HasComponent<Mesh>())
 		{
-			SharedPtr<Entity> portalEnt = world->GetEntity(child->Parent).lock();
-			if (portalEnt->HasComponent<Mesh>())
-			{
-				Mesh& meshComp = portalEnt->GetComponent<Mesh>();
+			Mesh& meshComp = BluePortal.GetComponent<Mesh>();
 
-				Camera& cam = BluePortalCamera->GetComponent<Camera>();
-					
-				Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
-				BluePortalTexture->UpdateBuffer(CamData.Buffer);
+			Camera& cam = BluePortalCamera->GetComponent<Camera>();
 
-				meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
-			}
+			Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
+			BluePortalTexture->UpdateBuffer(CamData.Buffer);
+
+			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
 		}
-	}
+
 		break;
+	}
 	case Portal::PortalType::Orange:
 	default:
 	{
 		OrangePortal = NewEntity;
-
-		auto children = OrangePortal.GetComponent<Transform>().GetChildren();
-		for (auto child : children)
+		if (OrangePortal.HasComponent<Mesh>())
 		{
-			SharedPtr<Entity> portalEnt = world->GetEntity(child->Parent).lock();
-			if (portalEnt->HasComponent<Mesh>())
-			{
-				Mesh& meshComp = portalEnt->GetComponent<Mesh>();
+			Mesh& meshComp = OrangePortal.GetComponent<Mesh>();
 
-				Camera& cam = OrangePortalCamera->GetComponent<Camera>();
+			Camera& cam = OrangePortalCamera->GetComponent<Camera>();
 
-				Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
-				OrangePortalTexture->UpdateBuffer(CamData.Buffer);
+			Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
+			OrangePortalTexture->UpdateBuffer(CamData.Buffer);
 
-				meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
-			}
+			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
 		}
-	}
-		break;
 
+		break;
+	}
 	}
 }
 
@@ -98,7 +88,65 @@ void PortalManagerCore::OnEditorInspect()
 
 void PortalManagerCore::Update(float dt)
 {
+	if(BluePortal && OrangePortal)
+	{
+		HandleCamera(BluePortal, OrangePortal, BluePortalCamera);
+		HandleCamera(OrangePortal, BluePortal, OrangePortalCamera);
+	}
+}
 
+void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal, SharedPtr<Entity>& portalCamera)
+{
+	auto world = GetEngine().GetWorld().lock();
+	Transform& transform = portalCamera->GetComponent<Transform>();
+	Portal& portal = primaryPortal.GetComponent<Portal>();
+
+	{
+		Vector3 offset =  otherPortal.GetComponent<Transform>().GetWorldPosition() - portal.Observer->GetWorldPosition();
+		transform.SetWorldPosition(primaryPortal.GetComponent<Transform>().GetWorldPosition() + offset);
+
+
+		float thing = 0;
+		float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
+
+		Quaternion portalRotationDistance = Quaternion::AngleAxis(difference, Vector3::Up);
+		Vector3 newCameraDirection =  portalRotationDistance* Camera::CurrentCamera->Front;
+
+		Vector3 forward = (portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition()).Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
+
+		//left_camera = up.cross(forward_camera).normalized();
+
+		//up_camera = forward_camera.cross(left_camera).normalized();
+
+		//translation_camera = t_look;
+
+		portalCamera->GetComponent<Camera>().Front = forward;
+		transform.LookAt(forward);
+	}
+
+	if (false)
+	{
+		Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
+
+		transform.SetWorldPosition(primaryPortal.GetComponent<Transform>().GetWorldPosition() + offset);
+
+		float thing = 0;
+		float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
+
+		Quaternion portalRotationDistance = Quaternion::AngleAxis(difference, Vector3::Up);
+		Vector3 newCameraDirection = portalRotationDistance * Camera::CurrentCamera->Front;
+
+		Vector3 forward = newCameraDirection.Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
+
+		//left_camera = up.cross(forward_camera).normalized();
+
+		//up_camera = forward_camera.cross(left_camera).normalized();
+
+		//translation_camera = t_look;
+
+		portalCamera->GetComponent<Camera>().Front = forward;
+		transform.LookAt(forward);
+	}
 }
 
 void PortalManagerCore::Init()

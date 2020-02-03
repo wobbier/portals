@@ -1,6 +1,9 @@
 {
     "Cores": [
         {
+            "Type": "PortalManagerCore"
+        },
+        {
             "Type": "AudioCore"
         },
         {
@@ -8,9 +11,6 @@
         },
         {
             "Type": "PhysicsCore"
-        },
-        {
-            "Type": "PortalManagerCore"
         }
     ],
     "Scene": [
@@ -42,6 +42,7 @@
                                 0.9999964833259583,
                                 1.0
                             ],
+                            "MeshType": "Model",
                             "Textures": {
                                 "Diffuse": {
                                     "Path": "Assets/Textures/512x512.png",
@@ -52,8 +53,7 @@
                                 -5.0,
                                 -5.0
                             ],
-                            "Type": "Mesh",
-                            "test": true
+                            "Type": "Mesh"
                         }
                     ],
                     "Name": "Cube"
@@ -93,7 +93,7 @@
                     "Type": "Rigidbody"
                 }
             ],
-            "Name": "Cube"
+            "Name": "Ground"
         },
         {
             "Children": [
@@ -123,6 +123,7 @@
                                 0.20511339604854584,
                                 0.20511339604854584
                             ],
+                            "MeshType": "Model",
                             "Textures": {
                                 "Diffuse": {
                                     "Path": "Assets/CubeDiffuse.jpg",
@@ -133,8 +134,7 @@
                                 1.0,
                                 1.0
                             ],
-                            "Type": "Mesh",
-                            "test": true
+                            "Type": "Mesh"
                         }
                     ],
                     "Name": "Cube"
@@ -204,6 +204,7 @@
                                 0.8463642001152039,
                                 0.9117646813392639
                             ],
+                            "MeshType": "Model",
                             "Textures": {
                                 "Diffuse": {
                                     "Path": "Assets/CubeDiffuse.jpg",
@@ -214,8 +215,7 @@
                                 1.0,
                                 1.0
                             ],
-                            "Type": "Mesh",
-                            "test": true
+                            "Type": "Mesh"
                         }
                     ],
                     "Name": "Cube"
@@ -330,6 +330,7 @@
                                                 1.0,
                                                 1.0
                                             ],
+                                            "MeshType": "Model",
                                             "Textures": {
                                                 "Diffuse": {
                                                     "Path": "Assets/Portal Gun (from Portal 2)/textures/portalgun_col.jpg",
@@ -344,8 +345,7 @@
                                                 1.0,
                                                 1.0
                                             ],
-                                            "Type": "Mesh",
-                                            "test": true
+                                            "Type": "Mesh"
                                         }
                                     ],
                                     "Name": "PortalGun"
@@ -526,6 +526,7 @@
                                         1.0,
                                         1.0
                                     ],
+                                    "MeshType": "Model",
                                     "Textures": {
                                         "Diffuse": {
                                             "Path": "Assets/Models/cube_heart.png",
@@ -536,8 +537,7 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "Type": "Mesh",
-                                    "test": true
+                                    "Type": "Mesh"
                                 }
                             ],
                             "Name": "Mesh"
@@ -630,6 +630,7 @@
                                 0.9999899864196777,
                                 0.9999899864196777
                             ],
+                            "MeshType": "Model",
                             "Textures": {
                                 "Diffuse": {
                                     "Path": "Assets/Textures/512x512.png",
@@ -640,8 +641,7 @@
                                 -1.0,
                                 -1.0
                             ],
-                            "Type": "Mesh",
-                            "test": true
+                            "Type": "Mesh"
                         }
                     ],
                     "Name": "Cube"
@@ -682,6 +682,168 @@
                 }
             ],
             "Name": "Ramp"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                -0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "DiffuseColor": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "MeshType": "Model",
+                            "Textures": {
+                                "Diffuse": {
+                                    "Path": "Assets/Textures/512x512.png",
+                                    "RenderMode": "Opaque"
+                                }
+                            },
+                            "Tiling": [
+                                -9.0,
+                                -8.0
+                            ],
+                            "Type": "Mesh"
+                        }
+                    ],
+                    "Name": "Cube"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        2.366260528564453,
+                        1.5103459358215332,
+                        20.37863540649414
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        20.0,
+                        20.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ModelPath": "Assets/Cube.fbx",
+                    "Type": "Model"
+                },
+                {
+                    "ColliderType": "Box",
+                    "Mass": 0.0,
+                    "Scale": [
+                        20.0,
+                        20.0,
+                        1.0
+                    ],
+                    "Type": "Rigidbody"
+                }
+            ],
+            "Name": "Wall"
+        },
+        {
+            "Children": [
+                {
+                    "Components": [
+                        {
+                            "Position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Rotation": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "Scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Transform"
+                        },
+                        {
+                            "DiffuseColor": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "MeshType": "Model",
+                            "Textures": {
+                                "Diffuse": {
+                                    "Path": "Assets/CubeDiffuse.jpg",
+                                    "RenderMode": "Opaque"
+                                }
+                            },
+                            "Tiling": [
+                                1.0,
+                                1.0
+                            ],
+                            "Type": "Mesh"
+                        }
+                    ],
+                    "Name": "Cube"
+                }
+            ],
+            "Components": [
+                {
+                    "Position": [
+                        -8.35649299621582,
+                        -14.614176750183105,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        5.0,
+                        4.0,
+                        1.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "ModelPath": "Assets/Cube.fbx",
+                    "Type": "Model"
+                },
+                {
+                    "ColliderType": "Box",
+                    "Mass": 0.0,
+                    "Scale": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Type": "Rigidbody"
+                }
+            ],
+            "Name": "New Entity"
         }
     ]
 }

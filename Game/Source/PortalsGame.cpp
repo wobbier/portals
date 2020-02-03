@@ -16,7 +16,7 @@
 #include "Engine/World.h"
 #include "Path.h"
 #include "Game.h"
-#include "HavanaEvents.h"
+#include "Events/SceneEvents.h"
 
 PortalsGame::PortalsGame()
 	: Game()

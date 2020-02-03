@@ -21,6 +21,7 @@ public:
 
 	void Update(float dt) override;
 
+
 private:
 	void Init() override;
 	void OnStart() override;
@@ -28,6 +29,7 @@ private:
 
 	void RecusiveDelete(Entity ent, Transform* trans);;
 
+	void HandleCamera(Entity& primaryPortal, Entity& otherPortal, SharedPtr<Entity>& portalCamera);
 
 	SharedPtr<Entity> BluePortalCamera;
 	SharedPtr<Entity> OrangePortalCamera;

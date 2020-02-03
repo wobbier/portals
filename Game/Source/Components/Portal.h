@@ -29,6 +29,8 @@ public:
 	{
 	}
 	PortalType Type = PortalType::Blue;
+
+	Transform* Observer = nullptr;
 };
 
 ME_REGISTER_COMPONENT(Portal)
