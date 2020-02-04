@@ -10,6 +10,7 @@
 #include "Graphics/Texture.h"
 #include "Camera/CameraData.h"
 #include "Renderer.h"
+#include "Mathf.h"
 
 PortalManagerCore::PortalManagerCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Portal>())
@@ -42,11 +43,14 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 			Mesh& meshComp = BluePortal.GetComponent<Mesh>();
 
 			Camera& cam = BluePortalCamera->GetComponent<Camera>();
+			cam.Skybox = Camera::CurrentCamera->Skybox;
+			cam.OutputSize = Camera::CurrentCamera->OutputSize;
 
 			Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
 			BluePortalTexture->UpdateBuffer(CamData.Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
+			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.X() / CamData.Buffer->Width, cam.OutputSize.Y() / CamData.Buffer->Height);
 		}
 
 		break;
@@ -60,11 +64,13 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 			Mesh& meshComp = OrangePortal.GetComponent<Mesh>();
 
 			Camera& cam = OrangePortalCamera->GetComponent<Camera>();
-
+			cam.Skybox = Camera::CurrentCamera->Skybox;
+			cam.OutputSize = Camera::CurrentCamera->OutputSize;
 			Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
 			OrangePortalTexture->UpdateBuffer(CamData.Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
+			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.X() / CamData.Buffer->Width, cam.OutputSize.Y() / CamData.Buffer->Height);
 		}
 
 		break;
@@ -102,24 +108,27 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 	Portal& portal = primaryPortal.GetComponent<Portal>();
 
 	{
-		Vector3 offset =  otherPortal.GetComponent<Transform>().GetWorldPosition() - portal.Observer->GetWorldPosition();
-		transform.SetWorldPosition(primaryPortal.GetComponent<Transform>().GetWorldPosition() + offset);
+		Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
+		offset = (primaryPortal.GetComponent<Transform>().GetWorldPosition() - offset);
+		offset.SetY(portal.Observer->GetWorldPosition().Y());
+		Vector3 offset2 = portal.Observer->GetWorldPosition() - primaryPortal.GetComponent<Transform>().GetWorldPosition();
+		transform.SetWorldPosition(offset);
 
 
 		float thing = 0;
 		float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
 
-		Quaternion portalRotationDistance = Quaternion::AngleAxis(difference, Vector3::Up);
+		Quaternion portalRotationDistance = Quaternion::AngleAxis(180.0f, Vector3::Up);
 		Vector3 newCameraDirection =  portalRotationDistance* Camera::CurrentCamera->Front;
 
-		Vector3 forward = (portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition()).Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
+		Vector3 forward = newCameraDirection;// (portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition()).Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
 
 		//left_camera = up.cross(forward_camera).normalized();
 
 		//up_camera = forward_camera.cross(left_camera).normalized();
 
 		//translation_camera = t_look;
-
+		portalCamera->GetComponent<Camera>().Near = Mathf::Abs(offset2.Dot(primaryPortal.GetComponent<Transform>().Front()));
 		portalCamera->GetComponent<Camera>().Front = forward;
 		transform.LookAt(forward);
 	}
@@ -162,14 +171,16 @@ void PortalManagerCore::OnStart()
 		BluePortalCamera = world->CreateEntity().lock();
 		Transform& portalCamera = BluePortalCamera->AddComponent<Transform>("Blue Portal Camera");
 		portalCamera.SetPosition(Vector3(0, 5, -10));
-		BluePortalCamera->AddComponent<Camera>();
+		Camera& cam = BluePortalCamera->AddComponent<Camera>();
+		cam.Skybox = Camera::CurrentCamera->Skybox;
 		BluePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
 	}
 	{
 		OrangePortalCamera = world->CreateEntity().lock();
 		Transform& portalCamera = OrangePortalCamera->AddComponent<Transform>("Orange Portal Camera");
 		portalCamera.SetPosition(Vector3(0, 5, -10));
-		OrangePortalCamera->AddComponent<Camera>();
+		Camera& cam = OrangePortalCamera->AddComponent<Camera>();
+		cam.Skybox = Camera::CurrentCamera->Skybox;
 		OrangePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
 	}
 }
