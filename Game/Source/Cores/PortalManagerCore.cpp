@@ -24,10 +24,12 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 	Portal& portalComponent = NewEntity.GetComponent<Portal>();
 	if (world->GetEntity(BluePortal.GetId()).lock() && portalComponent.Type == Portal::PortalType::Blue)
 	{
+		BluePortal.GetComponent<Transform>().RemoveChild(&BluePortalCamera->GetComponent<Transform>());
 		RecusiveDelete(BluePortal, &BluePortal.GetComponent<Transform>());
 	}
 	if (world->GetEntity(OrangePortal.GetId()).lock() && portalComponent.Type == Portal::PortalType::Orange)
 	{
+		OrangePortal.GetComponent<Transform>().RemoveChild(&OrangePortalCamera->GetComponent<Transform>());
 		RecusiveDelete(OrangePortal, &OrangePortal.GetComponent<Transform>());
 	}
 
@@ -51,6 +53,8 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
 			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.X() / CamData.Buffer->Width, cam.OutputSize.Y() / CamData.Buffer->Height);
+
+			BluePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
 
 		break;
@@ -71,6 +75,8 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
 			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.X() / CamData.Buffer->Width, cam.OutputSize.Y() / CamData.Buffer->Height);
+
+			OrangePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
 
 		break;
@@ -107,6 +113,18 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 	Transform& transform = portalCamera->GetComponent<Transform>();
 	Portal& portal = primaryPortal.GetComponent<Portal>();
 
+	auto mainCam = GameWorld->GetEntity(Camera::CurrentCamera->Parent).lock();
+	Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
+	Transform& otherPortalTransform = otherPortal.GetComponent<Transform>();
+	//primaryPortalTransform.UpdateWorldTransform();
+	//otherPortalTransform.UpdateWorldTransform();
+
+	Matrix4 cameraMatrix = Matrix4(primaryPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix() * otherPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix() * mainCam->GetComponent<Transform>().GetLocalToWorldMatrix().GetInternalMatrix());
+	
+	transform.SetWorldTransform(cameraMatrix, true);
+
+
+	if(false)
 	{
 		Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
 		offset = (primaryPortal.GetComponent<Transform>().GetWorldPosition() - offset);
