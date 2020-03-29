@@ -41,7 +41,7 @@ private:
 	bool m_prevSecondaryFireDown = false;
 	bool m_firstUpdate = true;
 
-	float LookSensitivity = .5f;
+	float LookSensitivity = 6.f;
 	float m_lastX = 0.0f;
 	float m_lastY = 0.0f;
 	AudioSource* m_orangePortalShot = nullptr;

@@ -3,6 +3,7 @@
 #include "ECS/Core.h"
 #include "Pointers.h"
 #include "Components/Transform.h"
+#include "ECS/EntityHandle.h"
 
 namespace Moonlight { class Texture; }
 
@@ -27,12 +28,12 @@ private:
 	void OnStart() override;
 	void OnStop() override;
 
-	void RecusiveDelete(Entity ent, Transform* trans);;
+	void RecusiveDelete(Entity& ent, Transform* trans);
 
-	void HandleCamera(Entity& primaryPortal, Entity& otherPortal, SharedPtr<Entity>& portalCamera);
+	void HandleCamera(Entity& primaryPortal, Entity& otherPortal, EntityHandle& portalCamera);
 
-	SharedPtr<Entity> BluePortalCamera;
-	SharedPtr<Entity> OrangePortalCamera;
+	EntityHandle BluePortalCamera;
+	EntityHandle OrangePortalCamera;
 
 	Entity BluePortal;
 	Entity OrangePortal;

@@ -22,12 +22,12 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 {
 	auto world = GetEngine().GetWorld().lock();
 	Portal& portalComponent = NewEntity.GetComponent<Portal>();
-	if (world->GetEntity(BluePortal.GetId()).lock() && portalComponent.Type == Portal::PortalType::Blue)
+	if (BluePortal && portalComponent.Type == Portal::PortalType::Blue)
 	{
 		BluePortal.GetComponent<Transform>().RemoveChild(&BluePortalCamera->GetComponent<Transform>());
 		RecusiveDelete(BluePortal, &BluePortal.GetComponent<Transform>());
 	}
-	if (world->GetEntity(OrangePortal.GetId()).lock() && portalComponent.Type == Portal::PortalType::Orange)
+	if (OrangePortal && portalComponent.Type == Portal::PortalType::Orange)
 	{
 		OrangePortal.GetComponent<Transform>().RemoveChild(&OrangePortalCamera->GetComponent<Transform>());
 		RecusiveDelete(OrangePortal, &OrangePortal.GetComponent<Transform>());
@@ -107,22 +107,25 @@ void PortalManagerCore::Update(float dt)
 	}
 }
 
-void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal, SharedPtr<Entity>& portalCamera)
+void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal, EntityHandle& portalCamera)
 {
 	auto world = GetEngine().GetWorld().lock();
 	Transform& transform = portalCamera->GetComponent<Transform>();
 	Portal& portal = primaryPortal.GetComponent<Portal>();
 
-	auto mainCam = GameWorld->GetEntity(Camera::CurrentCamera->Parent).lock();
-	Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
-	Transform& otherPortalTransform = otherPortal.GetComponent<Transform>();
-	//primaryPortalTransform.UpdateWorldTransform();
-	//otherPortalTransform.UpdateWorldTransform();
+	if (false)
+	{
+		auto& mainCam = Camera::CurrentCamera->Parent;
+		Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
+		Transform& otherPortalTransform = otherPortal.GetComponent<Transform>();
+		//primaryPortalTransform.UpdateWorldTransform();
+		//otherPortalTransform.UpdateWorldTransform();
 
-	Matrix4 cameraMatrix = Matrix4(primaryPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix() * otherPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix() * mainCam->GetComponent<Transform>().GetLocalToWorldMatrix().GetInternalMatrix());
-	
-	transform.SetWorldTransform(cameraMatrix, true);
+		Matrix4 cameraMatrix = Matrix4(primaryPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix() * otherPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix() * mainCam->GetComponent<Transform>().GetLocalToWorldMatrix().GetInternalMatrix());
 
+		transform.SetWorldTransform(cameraMatrix, true);
+
+	}
 
 	if(false)
 	{
@@ -137,20 +140,15 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 		float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
 
 		Quaternion portalRotationDistance = Quaternion::AngleAxis(180.0f, Vector3::Up);
-		Vector3 newCameraDirection =  portalRotationDistance* Camera::CurrentCamera->Front;
+		Vector3 newCameraDirection =  portalRotationDistance* transform.Front();
 
 		Vector3 forward = newCameraDirection;// (portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition()).Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
 
-		//left_camera = up.cross(forward_camera).normalized();
-
-		//up_camera = forward_camera.cross(left_camera).normalized();
-
-		//translation_camera = t_look;
 		portalCamera->GetComponent<Camera>().Near = Mathf::Abs(offset2.Dot(primaryPortal.GetComponent<Transform>().Front()));
-		portalCamera->GetComponent<Camera>().Front = forward;
+
 		transform.LookAt(forward);
 	}
-
+	int arr[1];
 	if (false)
 	{
 		Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
@@ -161,17 +159,10 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 		float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
 
 		Quaternion portalRotationDistance = Quaternion::AngleAxis(difference, Vector3::Up);
-		Vector3 newCameraDirection = portalRotationDistance * Camera::CurrentCamera->Front;
+		Vector3 newCameraDirection = portalRotationDistance * transform.Front();
 
-		Vector3 forward = newCameraDirection.Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
+		Vector3 forward = newCameraDirection.Normalized();
 
-		//left_camera = up.cross(forward_camera).normalized();
-
-		//up_camera = forward_camera.cross(left_camera).normalized();
-
-		//translation_camera = t_look;
-
-		portalCamera->GetComponent<Camera>().Front = forward;
 		transform.LookAt(forward);
 	}
 }
@@ -186,7 +177,7 @@ void PortalManagerCore::OnStart()
 	auto world = GetEngine().GetWorld().lock();
 	
 	{
-		BluePortalCamera = world->CreateEntity().lock();
+		BluePortalCamera = world->CreateEntity();
 		Transform& portalCamera = BluePortalCamera->AddComponent<Transform>("Blue Portal Camera");
 		portalCamera.SetPosition(Vector3(0, 5, -10));
 		Camera& cam = BluePortalCamera->AddComponent<Camera>();
@@ -194,7 +185,7 @@ void PortalManagerCore::OnStart()
 		BluePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
 	}
 	{
-		OrangePortalCamera = world->CreateEntity().lock();
+		OrangePortalCamera = world->CreateEntity();
 		Transform& portalCamera = OrangePortalCamera->AddComponent<Transform>("Orange Portal Camera");
 		portalCamera.SetPosition(Vector3(0, 5, -10));
 		Camera& cam = OrangePortalCamera->AddComponent<Camera>();
@@ -208,7 +199,7 @@ void PortalManagerCore::OnStop()
 
 }
 
-void PortalManagerCore::RecusiveDelete(Entity ent, Transform* trans)
+void PortalManagerCore::RecusiveDelete(Entity& ent, Transform* trans)
 {
 	if (!trans)
 	{
@@ -216,7 +207,7 @@ void PortalManagerCore::RecusiveDelete(Entity ent, Transform* trans)
 	}
 	for (auto child : trans->GetChildren())
 	{
-		RecusiveDelete(*GetEngine().GetWorld().lock()->GetEntity(child->Parent).lock(), child);
+		RecusiveDelete(*child->Parent.Get(), child);
 	}
 	ent.MarkForDelete();
 }

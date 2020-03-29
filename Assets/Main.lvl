@@ -1,10 +1,10 @@
 {
     "Cores": [
         {
-            "Type": "PortalManagerCore"
+            "Type": "AudioCore"
         },
         {
-            "Type": "AudioCore"
+            "Type": "PortalManagerCore"
         },
         {
             "Type": "CharacterCore"
@@ -63,7 +63,7 @@
                 {
                     "Position": [
                         2.4547667503356934,
-                        -19.582185745239258,
+                        1.0,
                         0.0
                     ],
                     "Rotation": [
@@ -144,7 +144,7 @@
                 {
                     "Position": [
                         0.0,
-                        -1.3287975788116455,
+                        5.0,
                         -9.379783630371094
                     ],
                     "Rotation": [
@@ -411,7 +411,7 @@
                 {
                     "Position": [
                         0.0,
-                        0.25,
+                        10.0,
                         0.0
                     ],
                     "Rotation": [
@@ -836,9 +836,9 @@
                     "ColliderType": "Box",
                     "Mass": 0.0,
                     "Scale": [
-                        0.0,
-                        0.0,
-                        0.0
+                        5.0,
+                        4.0,
+                        1.0
                     ],
                     "Type": "Rigidbody"
                 }

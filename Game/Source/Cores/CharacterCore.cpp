@@ -22,6 +22,7 @@
 #include "Graphics/ShaderCommand.h"
 #include "Graphics/Material.h"
 #include "RenderCommands.h"
+#include "ECS/EntityHandle.h"
 
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
@@ -32,7 +33,7 @@ CharacterCore::CharacterCore()
 	m_invalidPortalSounds.reserve(4);
 	for (int i = 0; i < 4; ++i)
 	{
-		m_invalidPortalSounds.push_back(new AudioSource("Assets/Sounds/Gun/portal_invalid_surface_0" + std::to_string(i+1) + ".wav"));
+		m_invalidPortalSounds.push_back(new AudioSource("Assets/Sounds/Gun/portal_invalid_surface_0" + std::to_string(i + 1) + ".wav"));
 	}
 
 	AudioCore* audioCore = static_cast<AudioCore*>(GetEngine().GetWorld().lock()->GetCore(AudioCore::GetTypeId()));
@@ -62,9 +63,9 @@ void CharacterCore::OnEntityAdded(Entity& NewEntity)
 	m_playerTransform = &NewEntity.GetComponent<Transform>();
 	m_controller = &NewEntity.GetComponent<CharacterController>();
 	Transform* camera = m_playerTransform->GetChildByName("Camera");
-	WeakPtr<Entity> cameraEnt = GetEngine().GetWorld().lock()->GetEntity(camera->Parent);
-	m_camera = &cameraEnt.lock()->GetComponent<Camera>();
-	m_cameraTransform = &cameraEnt.lock()->GetComponent<Transform>();
+	EntityHandle& cameraEnt = camera->Parent;
+	m_camera = &cameraEnt->GetComponent<Camera>();
+	m_cameraTransform = &cameraEnt->GetComponent<Transform>();
 }
 
 void CharacterCore::OnEntityRemoved(Entity& InEntity)
@@ -83,6 +84,7 @@ void CharacterCore::OnEditorInspect()
 {
 	Base::OnEditorInspect();
 	ImGui::DragFloat("Movement Speed", &m_movementSpeed);
+	ImGui::DragFloat("Look Sensitivity", &LookSensitivity);
 }
 #endif
 
@@ -98,7 +100,7 @@ void CharacterCore::HandlePortalShots()
 		}
 		else
 		{
-			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size()-1)]->Play();
+			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size() - 1)]->Play();
 		}
 	}
 	m_prevPrimaryFireDown = isPrimaryFireDown;
@@ -112,7 +114,7 @@ void CharacterCore::HandlePortalShots()
 		}
 		else
 		{
-			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size()-1)]->Play();
+			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size() - 1)]->Play();
 		}
 	}
 	m_prevSecondaryFireDown = isSecondaryFireDown;
@@ -120,12 +122,6 @@ void CharacterCore::HandlePortalShots()
 
 void CharacterCore::HandleMouseLook(float dt)
 {
-	//Vector2 MousePosition = GetEngine().GetInput().GetMousePosition();
-	//if (MousePosition == Vector2(0, 0))
-	//{
-	//	return;
-	//}
-
 	Vector2 newPos = m_camera->OutputSize / 2.f;
 
 	DirectX::Mouse::State currentState = GetEngine().GetInput().GetMouseState();
@@ -142,39 +138,29 @@ void CharacterCore::HandleMouseLook(float dt)
 	}
 
 
-	float XOffset = currentState.x;
-	float YOffest = -currentState.y;
+	float XOffset = currentState.x * LookSensitivity * dt;
+	float YOffest = -currentState.y * LookSensitivity * dt;
 
-	m_lastX = currentState.x;
-	m_lastY = currentState.y;
-// 	YIKES("X: " + std::to_string(XOffset));
-// 	YIKES("Y: " + std::to_string(YOffest));
-	Vector3 Front = m_camera->Front;
-	//if(currentState.x != m_previousMouseState.x || currentState.y != m_previousMouseState.y)
-	{
-		XOffset *= LookSensitivity;
-		YOffest *= LookSensitivity;
+	float Yaw = m_camera->Yaw + XOffset;
+	float Pitch = m_camera->Pitch + YOffest;
 
-		float Yaw = m_camera->Yaw + XOffset;
-		float Pitch = m_camera->Pitch + YOffest;
+	if (Pitch > 89.0f)
+		Pitch = 89.0f;
+	if (Pitch < -89.0f)
+		Pitch = -89.0f;
 
-		if (Pitch > 89.0f)
-			Pitch = 89.0f;
-		if (Pitch < -89.0f)
-			Pitch = -89.0f;
+	m_camera->Yaw = Yaw;
+	m_camera->Pitch = Pitch;
 
-		m_camera->Yaw = Yaw;
-		m_camera->Pitch = Pitch;
+	Vector3 Front;
+	Front.SetX(cos(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
+	Front.SetY(sin(Mathf::Radians(Pitch)));
+	Front.SetZ(sin(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
 
-		Front.SetX(cos(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
-		Front.SetY(sin(Mathf::Radians(Pitch)));
-		Front.SetZ(sin(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
-		m_camera->Front = Front.Normalized();
-		m_cameraTransform->SetRotation(Vector3(Pitch, 0.0f, 0.0f));
-		m_playerTransform->SetRotation(Vector3(0.0f, -Yaw, 0.0f));
+	m_cameraTransform->SetRotation(Vector3(Pitch, 0.0f, 0.0f));
+	m_playerTransform->SetRotation(Vector3(0.0f, -Yaw, 0.0f));
 
-		m_previousMouseState = currentState;
-	}
+	m_previousMouseState = currentState;
 
 	Input& input = GetEngine().GetInput();
 	if (input.GetKeyboardState().W)
@@ -200,7 +186,6 @@ void CharacterCore::HandleMouseLook(float dt)
 	}
 
 	GetEngine().GetInput().SetMousePosition(newPos);
-	//MousePosition = GetEngine().GetInput().GetMousePosition();
 }
 
 bool CharacterCore::FirePortal(bool IsBluePortal)
@@ -219,12 +204,11 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 	directionsHit.reserve(4);
 	bool canFitPortal = true;
 	RaycastHit ray;
-	if (physics->Raycast(m_cameraTransform->GetWorldPosition(), m_cameraTransform->GetWorldPosition() + m_camera->Front * 20.0f, ray))
+	if (physics->Raycast(m_cameraTransform->GetWorldPosition(), m_cameraTransform->GetWorldPosition() + m_cameraTransform->Front() * 20.0f, ray))
 	{
-		auto ent = world->GetEntity(ray.What->Parent);
-		Transform& trans = ent.lock()->GetComponent<Transform>();
+		Transform& trans = ray.What->Parent->GetComponent<Transform>();
 		BRUH("HIT" + trans.Name);
-		
+
 		for (int i = 0; i < directions.size(); ++i)
 		{
 			Vector3 position = ray.Position + directions[i].Cross(ray.Normal).Normalized();
@@ -257,7 +241,7 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		//	hitEnt->AddComponent<Model>("Assets/Cube.fbx");
 		//}
 
-		auto hitEnt = world->CreateEntity().lock();
+		auto hitEnt = world->CreateEntity();
 		Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
 		hitEntTransform.SetWorldPosition(ray.Position + (ray.Normal * .01f));
 		hitEntTransform.SetScale(Vector3(2.f, 2.5f, 0.01f));
