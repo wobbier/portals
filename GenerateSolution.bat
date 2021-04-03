@@ -1,1 +1,1 @@
-%~dp0Engine\Tools\premake5.exe --file=premake.lua vs2017 --gfxapi=directx --project-name=Portals
+%~dp0Engine\Tools\premake5.exe --file=premake.lua vs2017 --gfxapi=directx --project-name=Portals --project-type=Win64

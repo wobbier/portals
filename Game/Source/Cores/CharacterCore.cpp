@@ -12,17 +12,15 @@
 #include "Mathf.h"
 #include "imgui.h"
 #include "Components/Physics/CharacterController.h"
-#include "Logger.h"
+#include "CLog.h"
 #include "Cores/PhysicsCore.h"
 #include "Cores/SceneGraph.h"
 #include "Components/Graphics/Model.h"
 #include "Components/Physics/Rigidbody.h"
 #include "Components/Graphics/Mesh.h"
 #include "Components/Portal.h"
-#include "Graphics/ShaderCommand.h"
-#include "Graphics/Material.h"
-#include "RenderCommands.h"
 #include "ECS/EntityHandle.h"
+#include "Materials/PortalMaterial.h"
 
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
@@ -91,7 +89,7 @@ void CharacterCore::OnEditorInspect()
 void CharacterCore::HandlePortalShots()
 {
 	Input& input = GetEngine().GetInput();
-	bool isPrimaryFireDown = input.GetMouseState().leftButton;
+	bool isPrimaryFireDown = input.IsMouseButtonDown(MouseButton::Left);
 	if (isPrimaryFireDown && !m_prevPrimaryFireDown)
 	{
 		if (FirePortal(true))
@@ -105,7 +103,7 @@ void CharacterCore::HandlePortalShots()
 	}
 	m_prevPrimaryFireDown = isPrimaryFireDown;
 
-	bool isSecondaryFireDown = input.GetMouseState().rightButton;
+	bool isSecondaryFireDown = input.IsMouseButtonDown(MouseButton::Right);
 	if (isSecondaryFireDown && !m_prevSecondaryFireDown)
 	{
 		if (FirePortal(false))
@@ -123,69 +121,62 @@ void CharacterCore::HandlePortalShots()
 void CharacterCore::HandleMouseLook(float dt)
 {
 	Vector2 newPos = m_camera->OutputSize / 2.f;
+	Input& input = GetEngine().GetInput();
 
-	DirectX::Mouse::State currentState = GetEngine().GetInput().GetMouseState();
-	if (m_firstUpdate || m_previousMouseState.positionMode != currentState.positionMode || GetEngine().GetInput().GetKeyboardState().R)
+	if (m_firstUpdate || input.IsKeyDown(KeyCode::R))
 	{
 		GetEngine().GetInput().SetMousePosition(newPos);
-		m_previousMouseState = GetEngine().GetInput().GetMouseState();
-		currentState = m_previousMouseState;
 		//MousePosition = GetEngine().GetInput().GetMousePosition();
-		m_lastX = m_previousMouseState.x;
-		m_lastY = m_previousMouseState.y;
+		previousMousePos = input.GetMousePosition();
+		
 		m_firstUpdate = false;
 		return;
 	}
 
+	Vector2 currentState = input.GetMousePosition();
+	float XOffset = ((currentState.x - previousMousePos.x) * LookSensitivity) * dt;
+	float YOffest = ((currentState.y - previousMousePos.y) * LookSensitivity) * dt;
+	previousMousePos = currentState;
 
-	float XOffset = currentState.x * LookSensitivity * dt;
-	float YOffest = -currentState.y * LookSensitivity * dt;
-
-	float Yaw = m_camera->Yaw + XOffset;
-	float Pitch = m_camera->Pitch + YOffest;
+	float Yaw = m_camera->Yaw -= XOffset;
+	float Pitch = m_camera->Pitch += YOffest;
 
 	if (Pitch > 89.0f)
 		Pitch = 89.0f;
 	if (Pitch < -89.0f)
 		Pitch = -89.0f;
 
-	m_camera->Yaw = Yaw;
-	m_camera->Pitch = Pitch;
-
 	Vector3 Front;
-	Front.SetX(cos(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
-	Front.SetY(sin(Mathf::Radians(Pitch)));
-	Front.SetZ(sin(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
+	Front.x = (cos(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
+	Front.y = (sin(Mathf::Radians(Pitch)));
+	Front.z = (sin(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
 
 	m_cameraTransform->SetRotation(Vector3(Pitch, 0.0f, 0.0f));
 	m_playerTransform->SetRotation(Vector3(0.0f, -Yaw, 0.0f));
 
-	m_previousMouseState = currentState;
-
-	Input& input = GetEngine().GetInput();
-	if (input.GetKeyboardState().W)
-	{
-		m_controller->Walk(Front.Cross(Vector3::Up).Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
-	}
-	if (input.GetKeyboardState().S)
+	if (input.IsKeyDown(KeyCode::W))
 	{
 		m_controller->Walk(Front.Cross(Vector3::Up).Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
 	}
+	if (input.IsKeyDown(KeyCode::S))
+	{
+		m_controller->Walk(Front.Cross(Vector3::Up).Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
+	}
 
-	if (input.GetKeyboardState().D)
+	if (input.IsKeyDown(KeyCode::D))
 	{
 		m_controller->Walk(Front.Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
 	}
-	if (input.GetKeyboardState().A)
+	if (input.IsKeyDown(KeyCode::A))
 	{
 		m_controller->Walk(Front.Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
 	}
-	if (input.GetKeyboardState().Space)
+	if (input.IsKeyDown(KeyCode::Space))
 	{
 		m_controller->Jump();
 	}
 
-	GetEngine().GetInput().SetMousePosition(newPos);
+	//GetEngine().GetInput().SetMousePosition(newPos);
 }
 
 bool CharacterCore::FirePortal(bool IsBluePortal)
@@ -207,7 +198,7 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 	if (physics->Raycast(m_cameraTransform->GetWorldPosition(), m_cameraTransform->GetWorldPosition() + m_cameraTransform->Front() * 20.0f, ray))
 	{
 		Transform& trans = ray.What->Parent->GetComponent<Transform>();
-		BRUH("HIT" + trans.Name);
+		BRUH("HIT" + trans.GetName());
 
 		for (int i = 0; i < directions.size(); ++i)
 		{
@@ -246,9 +237,9 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		hitEntTransform.SetWorldPosition(ray.Position + (ray.Normal * .01f));
 		hitEntTransform.SetScale(Vector3(2.f, 2.5f, 0.01f));
 
-		if (ray.Normal.Y() >= 0.98f)
+		if (ray.Normal.y >= 0.98f)
 		{
-			hitEntTransform.SetRotation(Vector3(90.f, m_playerTransform->GetRotation().Y(), 0.f));
+			hitEntTransform.SetRotation(Vector3(90.f, m_playerTransform->GetWorldRotation().y, 0.f));
 		}
 		else
 		{
@@ -260,9 +251,8 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
 		rigidbody.SetMass(0.f);
 
-		Moonlight::Material* mat = new Moonlight::Material();
-		Moonlight::ShaderCommand* shader = new Moonlight::ShaderCommand("Assets/Shaders/ScreenSpaceShader.hlsl");
-		Mesh& meshComp = hitEnt->AddComponent<Mesh>(Moonlight::MeshType::Plane, mat, shader);
+		PortalMaterial* mat = new PortalMaterial();
+		Mesh& meshComp = hitEnt->AddComponent<Mesh>(Moonlight::MeshType::Plane, mat);
 
 		meshComp.MeshMaterial->DiffuseColor = { 1.f, 1.f, 1.f };
 	}

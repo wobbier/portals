@@ -12,19 +12,19 @@ public:
 	{
 
 	}
-	virtual void Serialize(json& outJson) override
+	virtual void OnSerialize(json& outJson) final
 	{
 	}
 
-	virtual void Deserialize(const json& inJson) override
+	virtual void OnDeserialize(const json& inJson) final
 	{
 	}
 #if ME_EDITOR
-	virtual void OnEditorInspect() override
+	virtual void OnEditorInspect() final
 	{
 	}
 #endif
-	virtual void Init() override
+	virtual void Init() final
 	{
 	}
 };
@@ -39,27 +39,27 @@ public:
 	{
 
 	}
-	virtual void OnEntityAdded(Entity& NewEntity) override
+	virtual void OnEntityAdded(Entity& NewEntity) final
 	{
 	}
 
-	virtual void OnEntityRemoved(Entity& InEntity) override
+	virtual void OnEntityRemoved(Entity& InEntity) final
 	{
 	}
 
 #if ME_EDITOR
-	virtual void OnEditorInspect() override
+	virtual void OnEditorInspect() final
 	{
 		Base::OnEditorInspect();
 	}
 #endif
 
-	virtual void Update(float dt) override
+	virtual void Update(float dt) final
 	{
 	}
 
 private:
-	virtual void Init() override
+	virtual void Init() final
 	{
 	}
 };

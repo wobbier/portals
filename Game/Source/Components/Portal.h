@@ -31,6 +31,15 @@ public:
 	PortalType Type = PortalType::Blue;
 
 	Transform* Observer = nullptr;
+
+private:
+	void OnSerialize(json& outJson) override
+	{
+	}
+
+	void OnDeserialize(const json& inJson) override
+	{
+	}
 };
 
 ME_REGISTER_COMPONENT(Portal)

@@ -8,7 +8,7 @@ class PortalsGame
 	: public Game
 {
 public:
-	PortalsGame();
+	PortalsGame(int argc, char** argv);
 	~PortalsGame();
 
 	virtual void OnInitialize() override;

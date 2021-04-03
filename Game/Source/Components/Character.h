@@ -11,16 +11,24 @@ public:
 	}
 
 #if ME_EDITOR
-	virtual void OnEditorInspect() override
+	virtual void OnEditorInspect() final
 	{
 
 	}
 #endif
 
-	virtual void Init() override
+	virtual void Init() final
 	{
 	}
 
+private:
+	void OnSerialize(json& outJson) final
+	{
+	}
+
+	void OnDeserialize(const json& inJson) final
+	{
+	}
 };
 
 ME_REGISTER_COMPONENT(Character)

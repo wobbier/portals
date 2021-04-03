@@ -9,8 +9,8 @@
 #include "Components/Graphics/Mesh.h"
 #include "Graphics/Texture.h"
 #include "Camera/CameraData.h"
-#include "Renderer.h"
 #include "Mathf.h"
+#include <BGFXRenderer.h>
 
 PortalManagerCore::PortalManagerCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Portal>())
@@ -52,7 +52,7 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 			BluePortalTexture->UpdateBuffer(CamData.Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
-			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.X() / CamData.Buffer->Width, cam.OutputSize.Y() / CamData.Buffer->Height);
+			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData.Buffer->Width, cam.OutputSize.y / CamData.Buffer->Height);
 
 			BluePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
@@ -74,7 +74,7 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 			OrangePortalTexture->UpdateBuffer(CamData.Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
-			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.X() / CamData.Buffer->Width, cam.OutputSize.Y() / CamData.Buffer->Height);
+			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData.Buffer->Width, cam.OutputSize.y / CamData.Buffer->Height);
 
 			OrangePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
@@ -113,7 +113,7 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 	Transform& transform = portalCamera->GetComponent<Transform>();
 	Portal& portal = primaryPortal.GetComponent<Portal>();
 
-	if (false)
+	//if (false)
 	{
 		auto& mainCam = Camera::CurrentCamera->Parent;
 		Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
@@ -127,44 +127,43 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 
 	}
 
-	if(false)
-	{
-		Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
-		offset = (primaryPortal.GetComponent<Transform>().GetWorldPosition() - offset);
-		offset.SetY(portal.Observer->GetWorldPosition().Y());
-		Vector3 offset2 = portal.Observer->GetWorldPosition() - primaryPortal.GetComponent<Transform>().GetWorldPosition();
-		transform.SetWorldPosition(offset);
+	//if(false)
+	//{
+	//	Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
+	//	offset = (primaryPortal.GetComponent<Transform>().GetWorldPosition() - offset);
+	//	offset.SetY(portal.Observer->GetWorldPosition().Y());
+	//	Vector3 offset2 = portal.Observer->GetWorldPosition() - primaryPortal.GetComponent<Transform>().GetWorldPosition();
+	//	transform.SetWorldPosition(offset);
 
 
-		float thing = 0;
-		float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
+	//	float thing = 0;
+	//	float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
 
-		Quaternion portalRotationDistance = Quaternion::AngleAxis(180.0f, Vector3::Up);
-		Vector3 newCameraDirection =  portalRotationDistance* transform.Front();
+	//	Quaternion portalRotationDistance = Quaternion::AngleAxis(180.0f, Vector3::Up);
+	//	Vector3 newCameraDirection =  portalRotationDistance* transform.Front();
 
-		Vector3 forward = newCameraDirection;// (portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition()).Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
+	//	Vector3 forward = newCameraDirection;// (portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition()).Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
 
-		portalCamera->GetComponent<Camera>().Near = Mathf::Abs(offset2.Dot(primaryPortal.GetComponent<Transform>().Front()));
+	//	portalCamera->GetComponent<Camera>().Near = Mathf::Abs(offset2.Dot(primaryPortal.GetComponent<Transform>().Front()));
 
-		transform.LookAt(forward);
-	}
-	int arr[1];
-	if (false)
-	{
-		Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
+	//	transform.LookAt(forward);
+	//}
+	//if (false)
+	//{
+	//	Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
 
-		transform.SetWorldPosition(primaryPortal.GetComponent<Transform>().GetWorldPosition() + offset);
+	//	transform.SetWorldPosition(primaryPortal.GetComponent<Transform>().GetWorldPosition() + offset);
 
-		float thing = 0;
-		float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
+	//	float thing = 0;
+	//	float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
 
-		Quaternion portalRotationDistance = Quaternion::AngleAxis(difference, Vector3::Up);
-		Vector3 newCameraDirection = portalRotationDistance * transform.Front();
+	//	Quaternion portalRotationDistance = Quaternion::AngleAxis(difference, Vector3::Up);
+	//	Vector3 newCameraDirection = portalRotationDistance * transform.Front();
 
-		Vector3 forward = newCameraDirection.Normalized();
+	//	Vector3 forward = newCameraDirection.Normalized();
 
-		transform.LookAt(forward);
-	}
+	//	transform.LookAt(forward);
+	//}
 }
 
 void PortalManagerCore::Init()
@@ -207,7 +206,7 @@ void PortalManagerCore::RecusiveDelete(Entity& ent, Transform* trans)
 	}
 	for (auto child : trans->GetChildren())
 	{
-		RecusiveDelete(*child->Parent.Get(), child);
+		RecusiveDelete(*child->Parent.Get(), child.get());
 	}
 	ent.MarkForDelete();
 }

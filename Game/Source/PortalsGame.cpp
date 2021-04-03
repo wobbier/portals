@@ -18,8 +18,8 @@
 #include "Game.h"
 #include "Events/SceneEvents.h"
 
-PortalsGame::PortalsGame()
-	: Game()
+PortalsGame::PortalsGame(int argc, char** argv)
+	: Game(argc, argv)
 {
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "ECS/Core.h"
 #include "Components/Transform.h"
-#include <Mouse.h>
 #include "Math/Random.h"
 
 class AudioSource;
@@ -42,8 +41,6 @@ private:
 	bool m_firstUpdate = true;
 
 	float LookSensitivity = 6.f;
-	float m_lastX = 0.0f;
-	float m_lastY = 0.0f;
 	AudioSource* m_orangePortalShot = nullptr;
 	AudioSource* m_bluePortalShot = nullptr;
 	std::vector<AudioSource*> m_invalidPortalSounds;
@@ -52,8 +49,8 @@ private:
 	Transform* m_cameraTransform = nullptr;
 	CharacterController* m_controller = nullptr;
 	Random64 random;
-
-	DirectX::Mouse::State m_previousMouseState;
+	Vector2 previousMousePos;
+	//DirectX::Mouse::State m_previousMouseState;
 };
 
 ME_REGISTER_CORE(CharacterCore)
