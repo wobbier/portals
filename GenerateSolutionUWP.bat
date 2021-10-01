@@ -1,1 +1,1 @@
-%~dp0Engine\Tools\premake5.exe --file=premake.lua vs2017  --gfxapi=directx --with-renderdoc --project-name=Portals --uwp --project-type=UWP
+%~dp0Engine\Tools\premake5.exe --file=premake.lua vs2019 --project-name=Portals --project-type=UWP

@@ -34,11 +34,12 @@ private:
 
 	virtual void OnStart() override;
 
-	float m_movementSpeed = 10.f;
+	void OnDeserialize(const json& inJson) override;
+#if ME_EDITOR
+	void OnSerialize(json& outJson) override;
+#endif
 
-	bool m_prevPrimaryFireDown = false;
-	bool m_prevSecondaryFireDown = false;
-	bool m_firstUpdate = true;
+	float m_movementSpeed = 100.f;
 
 	float LookSensitivity = 6.f;
 	AudioSource* m_orangePortalShot = nullptr;
@@ -49,8 +50,6 @@ private:
 	Transform* m_cameraTransform = nullptr;
 	CharacterController* m_controller = nullptr;
 	Random64 random;
-	Vector2 previousMousePos;
-	//DirectX::Mouse::State m_previousMouseState;
 };
 
 ME_REGISTER_CORE(CharacterCore)

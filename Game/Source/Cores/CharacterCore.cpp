@@ -38,11 +38,9 @@ CharacterCore::CharacterCore()
 	audioCore->InitComponent(*m_bluePortalShot);
 	audioCore->InitComponent(*m_orangePortalShot);
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < m_invalidPortalSounds.size(); ++i)
 	{
-		AudioSource* source = new AudioSource("Assets/Sounds/Gun/portal_invalid_surface_0" + std::to_string(i + 1) + ".wav");
-		m_invalidPortalSounds.push_back(source);
-		audioCore->InitComponent(*source);
+		audioCore->InitComponent(*m_invalidPortalSounds[i]);
 	}
 }
 
@@ -89,8 +87,7 @@ void CharacterCore::OnEditorInspect()
 void CharacterCore::HandlePortalShots()
 {
 	Input& input = GetEngine().GetInput();
-	bool isPrimaryFireDown = input.IsMouseButtonDown(MouseButton::Left);
-	if (isPrimaryFireDown && !m_prevPrimaryFireDown)
+	if (input.WasMouseButtonPressed(MouseButton::Left))
 	{
 		if (FirePortal(true))
 		{
@@ -101,10 +98,7 @@ void CharacterCore::HandlePortalShots()
 			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size() - 1)]->Play();
 		}
 	}
-	m_prevPrimaryFireDown = isPrimaryFireDown;
-
-	bool isSecondaryFireDown = input.IsMouseButtonDown(MouseButton::Right);
-	if (isSecondaryFireDown && !m_prevSecondaryFireDown)
+	if (input.WasMouseButtonPressed(MouseButton::Right))
 	{
 		if (FirePortal(false))
 		{
@@ -115,7 +109,6 @@ void CharacterCore::HandlePortalShots()
 			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size() - 1)]->Play();
 		}
 	}
-	m_prevSecondaryFireDown = isSecondaryFireDown;
 }
 
 void CharacterCore::HandleMouseLook(float dt)
@@ -123,20 +116,9 @@ void CharacterCore::HandleMouseLook(float dt)
 	Vector2 newPos = m_camera->OutputSize / 2.f;
 	Input& input = GetEngine().GetInput();
 
-	if (m_firstUpdate || input.IsKeyDown(KeyCode::R))
-	{
-		GetEngine().GetInput().SetMousePosition(newPos);
-		//MousePosition = GetEngine().GetInput().GetMousePosition();
-		previousMousePos = input.GetMousePosition();
-		
-		m_firstUpdate = false;
-		return;
-	}
-
-	Vector2 currentState = input.GetMousePosition();
-	float XOffset = ((currentState.x - previousMousePos.x) * LookSensitivity) * dt;
-	float YOffest = ((currentState.y - previousMousePos.y) * LookSensitivity) * dt;
-	previousMousePos = currentState;
+	Vector2 currentState = input.GetRelativeMousePosition();
+	float XOffset = ((currentState.x) * LookSensitivity) * dt;
+	float YOffest = ((currentState.y) * LookSensitivity) * dt;
 
 	float Yaw = m_camera->Yaw -= XOffset;
 	float Pitch = m_camera->Pitch += YOffest;
@@ -175,8 +157,6 @@ void CharacterCore::HandleMouseLook(float dt)
 	{
 		m_controller->Jump();
 	}
-
-	//GetEngine().GetInput().SetMousePosition(newPos);
 }
 
 bool CharacterCore::FirePortal(bool IsBluePortal)
@@ -265,3 +245,20 @@ void CharacterCore::OnStart()
 	GetEngine().GetInput().SetMouseCapture(true);
 
 }
+
+void CharacterCore::OnDeserialize(const json& inJson)
+{
+	if (inJson.contains("MovementSpeed"))
+	{
+		m_movementSpeed = inJson["MovementSpeed"];
+	}
+}
+
+#if ME_EDITOR
+
+void CharacterCore::OnSerialize(json& outJson)
+{
+	outJson["MovementSpeed"] = m_movementSpeed;
+}
+
+#endif

@@ -11,6 +11,7 @@
 #include "Camera/CameraData.h"
 #include "Mathf.h"
 #include <BGFXRenderer.h>
+#include <Utils/CommandCache.h>
 
 PortalManagerCore::PortalManagerCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Portal>())
@@ -48,11 +49,11 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 			cam.Skybox = Camera::CurrentCamera->Skybox;
 			cam.OutputSize = Camera::CurrentCamera->OutputSize;
 
-			Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
-			BluePortalTexture->UpdateBuffer(CamData.Buffer);
+			Moonlight::CameraData* CamData = GetEngine().GetRenderer().GetCameraCache().Get(cam.GetCameraId());
+			BluePortalTexture->UpdateBuffer(CamData->Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
-			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData.Buffer->Width, cam.OutputSize.y / CamData.Buffer->Height);
+			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
 
 			BluePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
@@ -70,11 +71,11 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 			Camera& cam = OrangePortalCamera->GetComponent<Camera>();
 			cam.Skybox = Camera::CurrentCamera->Skybox;
 			cam.OutputSize = Camera::CurrentCamera->OutputSize;
-			Moonlight::CameraData& CamData = GetEngine().GetRenderer().GetCamera(cam.GetCameraId());
-			OrangePortalTexture->UpdateBuffer(CamData.Buffer);
+			Moonlight::CameraData* CamData = GetEngine().GetRenderer().GetCameraCache().Get(cam.GetCameraId());
+			OrangePortalTexture->UpdateBuffer(CamData->Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
-			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData.Buffer->Width, cam.OutputSize.y / CamData.Buffer->Height);
+			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
 
 			OrangePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
