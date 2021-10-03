@@ -3,6 +3,7 @@
 #include "Pointers.h"
 #include "ECS/Entity.h"
 #include "Cores/TestCore.h"
+#include "ComponentRegistry.h"
 
 class PortalsGame
 	: public Game

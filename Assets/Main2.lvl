@@ -81,8 +81,8 @@
                         -9.381002426147461
                     ],
                     "Rotation": [
-                        -0.0004965926636941731,
-                        0.06664607673883438,
+                        -0.0004965924890711904,
+                        0.06664606183767319,
                         0.001154339755885303
                     ],
                     "Scale": [
@@ -142,7 +142,7 @@
                     ],
                     "Rotation": [
                         -9.569530084263533e-05,
-                        0.04652352258563042,
+                        0.04652353376150131,
                         0.0005666050710715353
                     ],
                     "Scale": [
@@ -339,9 +339,9 @@
                         3.872002124786377
                     ],
                     "Rotation": [
-                        180.0,
+                        -180.0,
                         49.783565521240234,
-                        180.0
+                        -180.0
                     ],
                     "Scale": [
                         1.0,
@@ -658,7 +658,7 @@
                         ],
                         "Textures": {
                             "Diffuse": {
-                                "Path": "Assets/Textures/Prototyping/Dark/texture_13.png",
+                                "Path": "Assets/Textures/512x512.png",
                                 "RenderMode": "Opaque"
                             }
                         },
@@ -718,7 +718,7 @@
                         ],
                         "Textures": {
                             "Diffuse": {
-                                "Path": "Assets/Textures/Prototyping/Orange/texture_01.png",
+                                "Path": "Assets/Textures/512x512.png",
                                 "RenderMode": "Opaque"
                             }
                         },

@@ -42,12 +42,7 @@ void PortalsGame::OnEnd()
 
 void PortalsGame::OnInitialize()
 {
-	NewSceneEvent evt;
-	evt.Fire();
-	GetEngine().GetWorld().lock()->Start();
-	GetEngine().LoadScene("Assets/Main.lvl");
-	GetEngine().GetWorld().lock()->Simulate();
-	GetEngine().GetWorld().lock()->Start();
+	GetEngine().LoadScene("Assets/Main2.lvl");
 }
 
 void PortalsGame::PostRender()
