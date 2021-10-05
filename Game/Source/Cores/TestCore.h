@@ -20,6 +20,7 @@ public:
 	virtual void Update(float dt) override;
 
 	virtual void Init() override;
+	void OnStart() override;
 
 };
 

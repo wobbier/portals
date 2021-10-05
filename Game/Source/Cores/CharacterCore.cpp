@@ -21,6 +21,7 @@
 #include "Components/Portal.h"
 #include "ECS/EntityHandle.h"
 #include "Materials/PortalMaterial.h"
+#include <Materials/DiffuseMaterial.h>
 
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
@@ -87,7 +88,7 @@ void CharacterCore::OnEditorInspect()
 void CharacterCore::HandlePortalShots()
 {
 	Input& input = GetEngine().GetInput();
-	if (input.WasMouseButtonPressed(MouseButton::Left))
+	if (/*input.WasMouseButtonPressed(MouseButton::Left) || */input.WasKeyPressed(KeyCode::E))
 	{
 		if (FirePortal(true))
 		{
@@ -98,7 +99,7 @@ void CharacterCore::HandlePortalShots()
 			m_invalidPortalSounds[random(0, m_invalidPortalSounds.size() - 1)]->Play();
 		}
 	}
-	if (input.WasMouseButtonPressed(MouseButton::Right))
+	if (input.WasMouseButtonPressed(MouseButton::Right) || input.WasKeyPressed(KeyCode::Q))
 	{
 		if (FirePortal(false))
 		{
@@ -161,8 +162,7 @@ void CharacterCore::HandleMouseLook(float dt)
 
 bool CharacterCore::FirePortal(bool IsBluePortal)
 {
-	auto world = GetEngine().GetWorld().lock();
-	PhysicsCore* physics = static_cast<PhysicsCore*>(world->GetCore(PhysicsCore::GetTypeId()));
+	PhysicsCore* physics = static_cast<PhysicsCore*>(GameWorld->GetCore(PhysicsCore::GetTypeId()));
 
 	std::vector<Vector3> directions = {
 		{1.f, 0.f, 0.f}, // right
@@ -182,7 +182,8 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 
 		for (int i = 0; i < directions.size(); ++i)
 		{
-			Vector3 position = ray.Position + directions[i].Cross(ray.Normal).Normalized();
+			Vector3 cross = directions[i].Cross(ray.Normal);
+			Vector3 position = ray.Position + ((!cross.IsZero()) ? cross.Normalized() : Vector3());
 			RaycastHit boundsRay;
 			canFitPortal = canFitPortal && (physics->Raycast(position + ray.Normal, position - ray.Normal * 20.0f, boundsRay));
 			directionsHit.push_back(boundsRay.Position);
@@ -197,7 +198,7 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 	{
 		//for (int i = 0; i < directionsHit.size(); ++i)
 		//{
-		//	auto hitEnt = world->CreateEntity().lock();
+		//	auto hitEnt = world->CreateEntity();
 		//	Transform& hitEntTransform = hitEnt->AddComponent<Transform>("PortalBounds");
 		//	hitEntTransform.SetWorldPosition(directionsHit[i]);
 		//	hitEntTransform.SetScale(0.1f);
@@ -212,37 +213,117 @@ bool CharacterCore::FirePortal(bool IsBluePortal)
 		//	hitEnt->AddComponent<Model>("Assets/Cube.fbx");
 		//}
 
-		auto hitEnt = world->CreateEntity();
-		Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
-		hitEntTransform.SetWorldPosition(ray.Position + (ray.Normal * .01f));
-		hitEntTransform.SetScale(Vector3(2.f, 2.5f, 0.01f));
+		SpawnPortal(ray.Position, ray.Normal, IsBluePortal);
 
-		if (ray.Normal.y >= 0.98f)
-		{
-			hitEntTransform.SetRotation(Vector3(90.f, m_playerTransform->GetWorldRotation().y, 0.f));
-		}
-		else
-		{
-			hitEntTransform.LookAt(ray.Normal);
-		}
-		Portal& portal = hitEnt->AddComponent<Portal>(IsBluePortal ? Portal::PortalType::Blue : Portal::PortalType::Orange);
-		portal.Observer = m_cameraTransform;
-
-		Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
-		rigidbody.SetMass(0.f);
-
-		PortalMaterial* mat = new PortalMaterial();
-		Mesh& meshComp = hitEnt->AddComponent<Mesh>(Moonlight::MeshType::Plane, mat);
-
-		meshComp.MeshMaterial->DiffuseColor = { 1.f, 1.f, 1.f };
 	}
 
 	return canFitPortal;
 }
 
+void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePortal)
+{
+	auto hitEnt = GameWorld->CreateEntity();
+	Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
+	hitEntTransform.SetWorldPosition(position + (normal * 2.f));
+
+	if (normal.y >= 0.98f)
+	{
+		//hitEntTransform.SetRotation(m_playerTransform->GetRotationEuler());
+	}
+	else
+	{
+		//Quaternion q;
+		//q.SetLookRotation(normal);
+		//hitEntTransform.SetRotation(q);
+		//hitEntTransform.LookAt(normal.Normalized());
+		//hitEntTransform.Rotate(Vector3(90.f, 0.f, 0.f), TransformSpace::Self);
+	}
+	Portal& portal = hitEnt->AddComponent<Portal>(IsBluePortal ? Portal::PortalType::Blue : Portal::PortalType::Orange);
+	portal.Observer = m_cameraTransform;
+
+	Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
+	rigidbody.SetMass(0.f);
+
+	SharedPtr<Moonlight::Texture> defaultDiffuse = ResourceCache::GetInstance().Get<Moonlight::Texture>(Path("Assets/Textures/DefaultAlpha.png"));
+
+	Vector3 diffuseColor;
+	if (IsBluePortal)
+	{
+		diffuseColor = { 0.f, .82f, 1.f };
+	}
+	else
+	{
+		diffuseColor = { 1.f, .5f, 0.f };
+	}
+
+	// Portal Border
+	{
+		auto borderEnt = GameWorld->CreateEntity();
+		Transform& hitEntMeshTrans2 = borderEnt->AddComponent<Transform>("BorderTop");
+		hitEntMeshTrans2.SetScale(Vector3(2.1f, .1f, 0.5f));
+		hitEntMeshTrans2.SetPosition({0.f, 4.1f, 0.f});
+		hitEntMeshTrans2.SetParent(hitEntTransform);
+
+		DiffuseMaterial* mat = new DiffuseMaterial();
+		Mesh& meshComp = borderEnt->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+
+		//mat->ScreenSize = m_camera->OutputSize;
+		meshComp.MeshMaterial->DiffuseColor = diffuseColor;
+		meshComp.MeshMaterial->Tiling = { 1.f, 1.f };
+		meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
+	}
+	{
+		auto borderEnt = GameWorld->CreateEntity();
+		Transform& hitEntMeshTrans2 = borderEnt->AddComponent<Transform>("BorderLeft");
+		hitEntMeshTrans2.SetScale(Vector3(.1f, 4.2f, 0.5f));
+		hitEntMeshTrans2.SetPosition({ -2.1f, 0.f, 0.f });
+		hitEntMeshTrans2.SetParent(hitEntTransform);
+
+		DiffuseMaterial* mat = new DiffuseMaterial();
+		Mesh& meshComp = borderEnt->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+
+		//mat->ScreenSize = m_camera->OutputSize;
+		meshComp.MeshMaterial->DiffuseColor = diffuseColor;
+		meshComp.MeshMaterial->Tiling = { 1.f, 1.f };
+		meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
+	}
+	{
+		auto borderEnt = GameWorld->CreateEntity();
+		Transform& hitEntMeshTrans2 = borderEnt->AddComponent<Transform>("BorderRight");
+		hitEntMeshTrans2.SetScale(Vector3(.1f, 4.2f, 0.5f));
+		hitEntMeshTrans2.SetPosition({ 2.1f, 0.f, 0.f });
+		hitEntMeshTrans2.SetParent(hitEntTransform);
+
+		DiffuseMaterial* mat = new DiffuseMaterial();
+		Mesh& meshComp = borderEnt->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+
+		//mat->ScreenSize = m_camera->OutputSize;
+		meshComp.MeshMaterial->DiffuseColor = diffuseColor;
+		meshComp.MeshMaterial->Tiling = { 1.f, 1.f };
+		meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
+	}
+
+	{
+		auto hitEntMesh = GameWorld->CreateEntity();
+		Transform& hitEntMeshTrans = hitEntMesh->AddComponent<Transform>("Mesh");
+		hitEntMeshTrans.SetScale(Vector3(2.f, 4.f, 0.5f));
+		hitEntMeshTrans.SetParent(hitEntTransform);
+
+		PortalMaterial* mat = new PortalMaterial();
+		Mesh& meshComp = hitEntMesh->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+
+		mat->ScreenSize = m_camera->OutputSize;
+		meshComp.MeshMaterial->DiffuseColor = { 1.f, 1.f, 1.f };
+	}
+
+}
+
 void CharacterCore::OnStart()
 {
 	GetEngine().GetInput().SetMouseCapture(true);
+
+	//SpawnPortal({ 5, 2, 0 }, Vector3::Up, true);
+	//SpawnPortal({ -5, 2, 0 }, Vector3::Up, false);
 
 }
 

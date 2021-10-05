@@ -32,6 +32,8 @@ private:
 	void HandlePortalShots();
 	bool FirePortal(bool IsBluePortal);
 
+	void SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePortal);
+
 	virtual void OnStart() override;
 
 	void OnDeserialize(const json& inJson) override;

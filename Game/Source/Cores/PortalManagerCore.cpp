@@ -12,6 +12,9 @@
 #include "Mathf.h"
 #include <BGFXRenderer.h>
 #include <Utils/CommandCache.h>
+#include "Materials/PortalMaterial.h"
+#include "Window/IWindow.h"
+#include <Materials/DiffuseMaterial.h>
 
 PortalManagerCore::PortalManagerCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Portal>())
@@ -25,12 +28,12 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 	Portal& portalComponent = NewEntity.GetComponent<Portal>();
 	if (BluePortal && portalComponent.Type == Portal::PortalType::Blue)
 	{
-		BluePortal.GetComponent<Transform>().RemoveChild(&BluePortalCamera->GetComponent<Transform>());
+		//BluePortal.GetComponent<Transform>().RemoveChild(&BluePortalCamera->GetComponent<Transform>());
 		RecusiveDelete(BluePortal, &BluePortal.GetComponent<Transform>());
 	}
 	if (OrangePortal && portalComponent.Type == Portal::PortalType::Orange)
 	{
-		OrangePortal.GetComponent<Transform>().RemoveChild(&OrangePortalCamera->GetComponent<Transform>());
+		//OrangePortal.GetComponent<Transform>().RemoveChild(&OrangePortalCamera->GetComponent<Transform>());
 		RecusiveDelete(OrangePortal, &OrangePortal.GetComponent<Transform>());
 	}
 
@@ -40,22 +43,23 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 	case Portal::PortalType::Blue:
 	{
 		BluePortal = NewEntity;
-
-		if (BluePortal.HasComponent<Mesh>())
+		Transform* ttt = portalObject.GetChildByName("Mesh");
+		if (ttt && ttt->Parent->HasComponent<Mesh>())
 		{
-			Mesh& meshComp = BluePortal.GetComponent<Mesh>();
+			Mesh& meshComp = ttt->Parent->GetComponent<Mesh>();
 
 			Camera& cam = BluePortalCamera->GetComponent<Camera>();
 			cam.Skybox = Camera::CurrentCamera->Skybox;
+			cam.ClearType = Camera::CurrentCamera->ClearType;
 			cam.OutputSize = Camera::CurrentCamera->OutputSize;
 
 			Moonlight::CameraData* CamData = GetEngine().GetRenderer().GetCameraCache().Get(cam.GetCameraId());
 			BluePortalTexture->UpdateBuffer(CamData->Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, BluePortalTexture);
-			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
+			//meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
 
-			BluePortalCamera->GetComponent<Transform>().SetParent(portalObject);
+			//BluePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
 
 		break;
@@ -64,20 +68,22 @@ void PortalManagerCore::OnEntityAdded(Entity& NewEntity)
 	default:
 	{
 		OrangePortal = NewEntity;
-		if (OrangePortal.HasComponent<Mesh>())
+		Transform* ttt = portalObject.GetChildByName("Mesh");
+		if (ttt && ttt->Parent->HasComponent<Mesh>())
 		{
-			Mesh& meshComp = OrangePortal.GetComponent<Mesh>();
+			Mesh& meshComp = ttt->Parent->GetComponent<Mesh>();
 
 			Camera& cam = OrangePortalCamera->GetComponent<Camera>();
 			cam.Skybox = Camera::CurrentCamera->Skybox;
+			cam.ClearType = Camera::CurrentCamera->ClearType;
 			cam.OutputSize = Camera::CurrentCamera->OutputSize;
 			Moonlight::CameraData* CamData = GetEngine().GetRenderer().GetCameraCache().Get(cam.GetCameraId());
 			OrangePortalTexture->UpdateBuffer(CamData->Buffer);
 
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, OrangePortalTexture);
-			meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
+			//meshComp.MeshMaterial->Tiling = Vector2(cam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
 
-			OrangePortalCamera->GetComponent<Transform>().SetParent(portalObject);
+			//OrangePortalCamera->GetComponent<Transform>().SetParent(portalObject);
 		}
 
 		break;
@@ -103,8 +109,8 @@ void PortalManagerCore::Update(float dt)
 {
 	if(BluePortal && OrangePortal)
 	{
-		HandleCamera(BluePortal, OrangePortal, BluePortalCamera);
-		HandleCamera(OrangePortal, BluePortal, OrangePortalCamera);
+		HandleCamera(BluePortal, OrangePortal, OrangePortalCamera);
+		HandleCamera(OrangePortal, BluePortal, BluePortalCamera);
 	}
 }
 
@@ -114,20 +120,35 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 	Transform& transform = portalCamera->GetComponent<Transform>();
 	Portal& portal = primaryPortal.GetComponent<Portal>();
 
+	auto& mainCam = Camera::CurrentCamera->Parent;
 	//if (false)
 	{
-		auto& mainCam = Camera::CurrentCamera->Parent;
 		Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
 		Transform& otherPortalTransform = otherPortal.GetComponent<Transform>();
 		//primaryPortalTransform.UpdateWorldTransform();
 		//otherPortalTransform.UpdateWorldTransform();
 
-		Matrix4 cameraMatrix = Matrix4(primaryPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix() * otherPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix() * mainCam->GetComponent<Transform>().GetLocalToWorldMatrix().GetInternalMatrix());
+		Matrix4 cameraMatrix = Matrix4(
+			primaryPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix()
+			* 
+			otherPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix()
+			* 
+			mainCam->GetComponent<Transform>().GetLocalToWorldMatrix().GetInternalMatrix()
+		);// ;
 
-		transform.SetWorldTransform(cameraMatrix, true);
+		//transform.SetWorldTransform(cameraMatrix);
+		transform.SetPosition(cameraMatrix.GetPosition());
+		transform.SetRotation(cameraMatrix.GetRotation());
 
+		Transform* ttt = primaryPortalTransform.GetChildByName("Mesh");
+		if (ttt && ttt->Parent->HasComponent<Mesh>())
+		{
+			Mesh& meshComp = ttt->Parent->GetComponent<Mesh>();
+			Moonlight::CameraData* CamData = GetEngine().GetRenderer().GetCameraCache().Get(Camera::CurrentCamera->GetCameraId());
+
+			static_cast<PortalMaterial*>(meshComp.MeshMaterial.get())->ScreenSize = GetEngine().GetWindow()->GetSize();// Vector2(OrangePortalTexture->mWidth, OrangePortalTexture->mHeight);// Vector2(mainCam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
+		}
 	}
-
 	//if(false)
 	//{
 	//	Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
@@ -175,7 +196,8 @@ void PortalManagerCore::Init()
 void PortalManagerCore::OnStart()
 {
 	auto world = GetEngine().GetWorld().lock();
-	
+	SharedPtr<Moonlight::Texture> defaultDiffuse = ResourceCache::GetInstance().Get<Moonlight::Texture>(Path("Assets/Textures/DefaultAlpha.png"));
+
 	{
 		BluePortalCamera = world->CreateEntity();
 		Transform& portalCamera = BluePortalCamera->AddComponent<Transform>("Blue Portal Camera");
@@ -183,6 +205,16 @@ void PortalManagerCore::OnStart()
 		Camera& cam = BluePortalCamera->AddComponent<Camera>();
 		cam.Skybox = Camera::CurrentCamera->Skybox;
 		BluePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
+
+		// Debug camera view
+		{
+			portalCamera.SetScale({ .1f, .1f, .3f });
+			Vector3 diffuseColor = { 0.f, .82f, 1.f };
+			DiffuseMaterial* mat = new DiffuseMaterial();
+			Mesh& meshComp = BluePortalCamera->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+			meshComp.MeshMaterial->DiffuseColor = diffuseColor;
+			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
+		}
 	}
 	{
 		OrangePortalCamera = world->CreateEntity();
@@ -191,6 +223,17 @@ void PortalManagerCore::OnStart()
 		Camera& cam = OrangePortalCamera->AddComponent<Camera>();
 		cam.Skybox = Camera::CurrentCamera->Skybox;
 		OrangePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
+
+		// Debug camera view
+		{
+			portalCamera.SetScale({ .1f, .1f, .3f });
+			Vector3 diffuseColor = { 1.f, .5f, 0.f };
+
+			DiffuseMaterial* mat = new DiffuseMaterial();
+			Mesh& meshComp = OrangePortalCamera->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+			meshComp.MeshMaterial->DiffuseColor = diffuseColor;
+			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
+		}
 	}
 }
 
