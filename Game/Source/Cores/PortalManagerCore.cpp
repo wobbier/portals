@@ -140,6 +140,36 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 		transform.SetPosition(cameraMatrix.GetPosition());
 		transform.SetRotation(cameraMatrix.GetRotation());
 
+		// Testing Near Plane
+		{
+			Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
+			//offset = (primaryPortal.GetComponent<Transform>().GetWorldPosition() - offset);
+			//offset.SetY(portal.Observer->GetWorldPosition().Y());
+			Vector3 offset2 = portal.Observer->GetWorldPosition() - primaryPortal.GetComponent<Transform>().GetWorldPosition();
+			//transform.SetWorldPosition(offset);
+			//portalCamera->GetComponent<Camera>().Near = Mathf::Abs(offset.Length());// .Dot(primaryPortal.GetComponent<Transform>().Front()));
+		}
+
+		// Oblique Matrix
+		{
+			int dot = Mathf::Sign(primaryPortalTransform.Front().Dot(primaryPortalTransform.GetWorldPosition() - transform.GetWorldPosition()));
+
+			Vector3 camSpacePos = portalCamera->GetComponent<Camera>().WorldToCamera.TransformPoint(primaryPortalTransform.GetWorldPosition());
+			Vector3 camSpaceNormal = portalCamera->GetComponent<Camera>().WorldToCamera.TransformVector(primaryPortalTransform.Front()) * dot;
+			float camSpaceDst = -camSpacePos.Dot(camSpaceNormal) + 0.05f;
+
+			if (Mathf::Abs(camSpaceDst) > 0.2f)
+			{
+				glm::vec4 clipPlaneCameraSpace = glm::vec4(camSpaceNormal.x, camSpaceNormal.y, camSpaceNormal.z, camSpaceDst);
+				portalCamera->GetComponent<Camera>().SetObliqueMatrixData(clipPlaneCameraSpace);
+			}
+			else
+			{
+
+			}
+			TestEnt->GetComponent<Transform>().SetPosition(camSpacePos);
+		}
+
 		Transform* ttt = primaryPortalTransform.GetChildByName("Mesh");
 		if (ttt && ttt->Parent->HasComponent<Mesh>())
 		{
@@ -234,6 +264,13 @@ void PortalManagerCore::OnStart()
 			meshComp.MeshMaterial->DiffuseColor = diffuseColor;
 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
 		}
+	}
+	{
+		TestEnt = world->CreateEntity();
+		TestEnt->AddComponent<Transform>("TestCube");
+
+		DiffuseMaterial* mat = new DiffuseMaterial();
+		Mesh& meshComp = TestEnt->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
 	}
 }
 

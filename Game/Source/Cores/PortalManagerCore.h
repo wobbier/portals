@@ -40,6 +40,7 @@ private:
 
 	SharedPtr<Moonlight::Texture> BluePortalTexture;
 	SharedPtr<Moonlight::Texture> OrangePortalTexture;
+	EntityHandle TestEnt;
 };
 
 ME_REGISTER_CORE(PortalManagerCore)
