@@ -101,6 +101,8 @@ void PortalManagerCore::OnEntityRemoved(Entity& InEntity)
 void PortalManagerCore::OnEditorInspect()
 {
 	Base::OnEditorInspect();
+
+	ImGui::DragFloat("Oblique Plane Offset", &ObliquePlaneOffset);
 }
 
 #endif
@@ -156,7 +158,7 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 
 			Vector3 camSpacePos = portalCamera->GetComponent<Camera>().WorldToCamera.TransformPoint(primaryPortalTransform.GetWorldPosition());
 			Vector3 camSpaceNormal = portalCamera->GetComponent<Camera>().WorldToCamera.TransformVector(primaryPortalTransform.Front()) * dot;
-			float camSpaceDst = -camSpacePos.Dot(camSpaceNormal) + 0.05f;
+			float camSpaceDst = -camSpacePos.Dot(camSpaceNormal) + ObliquePlaneOffset;
 
 			if (Mathf::Abs(camSpaceDst) > 0.2f)
 			{

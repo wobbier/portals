@@ -228,7 +228,7 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 
 	if (normal.y >= 0.98f)
 	{
-		//hitEntTransform.SetRotation(m_playerTransform->GetRotationEuler());
+		hitEntTransform.SetRotation(m_playerTransform->GetRotationEuler());
 	}
 	else
 	{
@@ -241,8 +241,8 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 	Portal& portal = hitEnt->AddComponent<Portal>(IsBluePortal ? Portal::PortalType::Blue : Portal::PortalType::Orange);
 	portal.Observer = m_cameraTransform;
 
-	Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
-	rigidbody.SetMass(0.f);
+	//Rigidbody& rigidbody = hitEnt->AddComponent<Rigidbody>();
+	//rigidbody.SetMass(0.f);
 
 	SharedPtr<Moonlight::Texture> defaultDiffuse = ResourceCache::GetInstance().Get<Moonlight::Texture>(Path("Assets/Textures/DefaultAlpha.png"));
 
