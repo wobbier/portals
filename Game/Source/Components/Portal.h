@@ -31,6 +31,7 @@ public:
 	PortalType Type = PortalType::Blue;
 
 	Transform* Observer = nullptr;
+	std::vector<Entity> Travellers;
 
 private:
 	void OnSerialize(json& outJson) override

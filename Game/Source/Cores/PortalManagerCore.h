@@ -30,6 +30,7 @@ private:
 
 	void RecusiveDelete(Entity& ent, Transform* trans);
 
+	void HandleTravelling(Entity& primaryPortal, Entity& otherPortal);
 	void HandleCamera(Entity& primaryPortal, Entity& otherPortal, EntityHandle& portalCamera);
 
 	EntityHandle BluePortalCamera;

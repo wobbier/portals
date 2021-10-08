@@ -15,6 +15,7 @@
 #include "Materials/PortalMaterial.h"
 #include "Window/IWindow.h"
 #include <Materials/DiffuseMaterial.h>
+#include "Components/PortalTraveller.h"
 
 PortalManagerCore::PortalManagerCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Portal>())
@@ -111,8 +112,49 @@ void PortalManagerCore::Update(float dt)
 {
 	if(BluePortal && OrangePortal)
 	{
+		Portal& bluePortalComp = BluePortal.GetComponent<Portal>();
+		if (bluePortalComp.Travellers.empty())
+		{
+			auto& mainCam = Camera::CurrentCamera->Parent;
+			auto& playerObject = *mainCam->GetComponent<Transform>().GetParentTransform()->Parent.Get();
+			playerObject.GetComponent<PortalTraveller>().PreviousOffsetFromPortal = playerObject.GetComponent<Transform>().GetWorldPosition() - BluePortal.GetComponent<Transform>().GetWorldPosition();
+			bluePortalComp.Travellers.push_back(playerObject);
+		}
+		HandleTravelling(BluePortal, OrangePortal);
 		HandleCamera(BluePortal, OrangePortal, OrangePortalCamera);
 		HandleCamera(OrangePortal, BluePortal, BluePortalCamera);
+	}
+}
+
+void PortalManagerCore::HandleTravelling(Entity& primaryPortal, Entity& otherPortal)
+{
+	for (Entity& it : primaryPortal.GetComponent<Portal>().Travellers)
+	{
+		if (it.HasComponent<PortalTraveller>())
+		{
+			Transform& transform = it.GetComponent<Transform>();
+			PortalTraveller& traveller = it.GetComponent<PortalTraveller>();
+			Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
+			Transform& otherPortalTransform = otherPortal.GetComponent<Transform>();
+
+			Matrix4 m = otherPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix() * primaryPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix() * transform.GetLocalToWorldMatrix().GetInternalMatrix();
+
+			Vector3 offsetFromPortal = transform.GetWorldPosition() - primaryPortalTransform.GetWorldPosition();
+			int portalSide = Mathf::Sign(offsetFromPortal.Dot(primaryPortalTransform.Front()));
+			int portalSideOld = Mathf::Sign(traveller.PreviousOffsetFromPortal.Dot(transform.Front()));
+
+			if (portalSide != portalSideOld)
+			{
+				transform.SetWorldPosition(m.GetPosition());
+				transform.SetWorldRotation(m.GetRotation());
+				primaryPortal.GetComponent<Portal>().Travellers.clear();
+				return;
+			}
+			else
+			{
+				traveller.PreviousOffsetFromPortal = offsetFromPortal;
+			}
+		}
 	}
 }
 

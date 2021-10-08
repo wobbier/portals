@@ -1,11 +1,11 @@
 {
     "Cores": [
         {
-            "MovementSpeed": 100.0,
-            "Type": "CharacterCore"
+            "Type": "PhysicsCore"
         },
         {
-            "Type": "PhysicsCore"
+            "MovementSpeed": 100.0,
+            "Type": "CharacterCore"
         },
         {
             "Type": "PortalManagerCore"
@@ -56,6 +56,7 @@
                 },
                 {
                     "ColliderType": "Box",
+                    "IsEventsEnabled": false,
                     "Mass": 0.0,
                     "Scale": [
                         20.0,
@@ -81,7 +82,7 @@
                         -9.381002426147461
                     ],
                     "Rotation": [
-                        -0.0004965924890711904,
+                        -0.0004965921980328858,
                         0.06664606183767319,
                         0.001154339755885303
                     ],
@@ -116,6 +117,7 @@
                 },
                 {
                     "ColliderType": "Box",
+                    "IsEventsEnabled": true,
                     "Mass": 10.0,
                     "Scale": [
                         1.0,
@@ -142,7 +144,7 @@
                     ],
                     "Rotation": [
                         -9.569530084263533e-05,
-                        0.04652353376150131,
+                        0.046523552387952805,
                         0.0005666050710715353
                     ],
                     "Scale": [
@@ -176,6 +178,7 @@
                 },
                 {
                     "ColliderType": "Box",
+                    "IsEventsEnabled": false,
                     "Mass": 10.0,
                     "Scale": [
                         1.0,
@@ -237,62 +240,6 @@
         {
             "Children": [
                 {
-                    "Children": [
-                        {
-                            "Components": [
-                                {
-                                    "Position": [
-                                        0.8816372156143188,
-                                        -0.30000001192092896,
-                                        2.173151731491089
-                                    ],
-                                    "Rotation": [
-                                        -73.74561309814453,
-                                        52.15605163574219,
-                                        -170.1490478515625
-                                    ],
-                                    "Scale": [
-                                        0.009999999776482582,
-                                        0.009999999776482582,
-                                        0.009999999776482582
-                                    ],
-                                    "Type": "Transform"
-                                },
-                                {
-                                    "Material": {
-                                        "DiffuseColor": [
-                                            1.0,
-                                            1.0,
-                                            1.0
-                                        ],
-                                        "Textures": {
-                                            "Diffuse": {
-                                                "Path": "Assets/Portal Gun (from Portal 2)/textures/portalgun_col.jpg",
-                                                "RenderMode": "Opaque"
-                                            },
-                                            "Normal": {
-                                                "Path": "Assets/Portal Gun (from Portal 2)/textures/portalgun_nor.jpg",
-                                                "RenderMode": "Opaque"
-                                            }
-                                        },
-                                        "Tiling": [
-                                            1.0,
-                                            1.0
-                                        ],
-                                        "Type": "DiffuseMaterial"
-                                    },
-                                    "MeshType": "Model",
-                                    "Type": "Mesh"
-                                },
-                                {
-                                    "ModelPath": "Assets/Portal Gun (from Portal 2)/Portal Gun.fbx",
-                                    "Type": "Model"
-                                }
-                            ],
-                            "DestroyOnLoad": true,
-                            "Name": "Portal Gun"
-                        }
-                    ],
                     "Components": [
                         {
                             "ClearColor": [
@@ -339,9 +286,9 @@
                         3.872002124786377
                     ],
                     "Rotation": [
-                        -180.0,
+                        180.0,
                         49.783565521240234,
-                        -180.0
+                        180.0
                     ],
                     "Scale": [
                         1.0,
@@ -351,15 +298,18 @@
                     "Type": "Transform"
                 },
                 {
-                    "Type": "Character"
-                },
-                {
                     "Deceleration": 7.0,
                     "JumpForce": 20.0,
                     "JumpRechargeTime": 0.5,
                     "MaxSpeed": 100.0,
                     "StepHeight": 1.0,
                     "Type": "CharacterController"
+                },
+                {
+                    "Type": "Character"
+                },
+                {
+                    "Type": "PortalTraveller"
                 }
             ],
             "DestroyOnLoad": true,
@@ -497,6 +447,7 @@
                 },
                 {
                     "ColliderType": "Box",
+                    "IsEventsEnabled": false,
                     "Mass": 10.0,
                     "Scale": [
                         1.75,
@@ -553,6 +504,7 @@
                 },
                 {
                     "ColliderType": "Box",
+                    "IsEventsEnabled": false,
                     "Mass": 0.0,
                     "Scale": [
                         10.130000114440918,
@@ -613,6 +565,7 @@
                 },
                 {
                     "ColliderType": "Box",
+                    "IsEventsEnabled": false,
                     "Mass": 0.0,
                     "Scale": [
                         20.0,
@@ -673,6 +626,7 @@
                 },
                 {
                     "ColliderType": "Box",
+                    "IsEventsEnabled": false,
                     "Mass": 0.0,
                     "Scale": [
                         5.0,
@@ -738,6 +692,67 @@
             ],
             "DestroyOnLoad": true,
             "Name": "Cube"
+        },
+        {
+            "Components": [
+                {
+                    "Position": [
+                        -40.161861419677734,
+                        -19.476558685302734,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        20.0,
+                        1.0,
+                        20.0
+                    ],
+                    "Type": "Transform"
+                },
+                {
+                    "Material": {
+                        "DiffuseColor": [
+                            1.0,
+                            0.40311384201049805,
+                            0.3235294222831726
+                        ],
+                        "Textures": {
+                            "Diffuse": {
+                                "Path": "Assets/Textures/512x512.png",
+                                "RenderMode": "Opaque"
+                            }
+                        },
+                        "Tiling": [
+                            -1.0,
+                            1.0
+                        ],
+                        "Type": "DiffuseMaterial"
+                    },
+                    "MeshType": "Model",
+                    "Type": "Mesh"
+                },
+                {
+                    "ColliderType": "Box",
+                    "IsEventsEnabled": false,
+                    "Mass": 0.0,
+                    "Scale": [
+                        20.0,
+                        1.0,
+                        20.0
+                    ],
+                    "Type": "Rigidbody"
+                },
+                {
+                    "ModelPath": "Assets/Cube.fbx",
+                    "Type": "Model"
+                }
+            ],
+            "DestroyOnLoad": true,
+            "Name": "Ground"
         }
     ]
 }
