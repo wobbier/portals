@@ -113,14 +113,14 @@ void PortalManagerCore::Update(float dt)
 	if(BluePortal && OrangePortal)
 	{
 		Portal& bluePortalComp = BluePortal.GetComponent<Portal>();
-		if (bluePortalComp.Travellers.empty())
-		{
-			auto& mainCam = Camera::CurrentCamera->Parent;
-			auto& playerObject = *mainCam->GetComponent<Transform>().GetParentTransform()->Parent.Get();
-			playerObject.GetComponent<PortalTraveller>().PreviousOffsetFromPortal = playerObject.GetComponent<Transform>().GetWorldPosition() - BluePortal.GetComponent<Transform>().GetWorldPosition();
-			bluePortalComp.Travellers.push_back(playerObject);
-		}
-		HandleTravelling(BluePortal, OrangePortal);
+// 		if (bluePortalComp.Travellers.empty())
+// 		{
+// 			auto& mainCam = Camera::CurrentCamera->Parent;
+// 			auto& playerObject = *mainCam->GetComponent<Transform>().GetParentTransform()->Parent.Get();
+// 			playerObject.GetComponent<PortalTraveller>().PreviousOffsetFromPortal = playerObject.GetComponent<Transform>().GetWorldPosition() - BluePortal.GetComponent<Transform>().GetWorldPosition();
+// 			bluePortalComp.Travellers.push_back(playerObject);
+// 		}
+// 		HandleTravelling(BluePortal, OrangePortal);
 		HandleCamera(BluePortal, OrangePortal, OrangePortalCamera);
 		HandleCamera(OrangePortal, BluePortal, BluePortalCamera);
 	}
@@ -198,8 +198,15 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 		{
 			int dot = Mathf::Sign(primaryPortalTransform.Front().Dot(primaryPortalTransform.GetWorldPosition() - transform.GetWorldPosition()));
 
-			Vector3 camSpacePos = portalCamera->GetComponent<Camera>().WorldToCamera.TransformPoint(primaryPortalTransform.GetWorldPosition());
-			Vector3 camSpaceNormal = portalCamera->GetComponent<Camera>().WorldToCamera.TransformVector(primaryPortalTransform.Front()) * dot;
+			// SOOOOOOOOOOOO The CameraCore will eventually set the Camera::CameraToWorld matrix, but we need it NOW...
+			Vector3 eye = transform.GetWorldPosition();
+			Vector3 at = transform.GetWorldPosition() + transform.Front();
+			Vector3 up = transform.Up();
+
+			Matrix4 camShit = Matrix4(glm::lookAtLH(eye.InternalVector, at.InternalVector, up.InternalVector));
+
+			Vector3 camSpacePos = camShit.TransformPoint(primaryPortalTransform.GetWorldPosition());
+			Vector3 camSpaceNormal = camShit.TransformVector(primaryPortalTransform.Front()) * dot;
 			float camSpaceDst = -camSpacePos.Dot(camSpaceNormal) + ObliquePlaneOffset;
 
 			if (Mathf::Abs(camSpaceDst) > 0.2f)
@@ -209,7 +216,7 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 			}
 			else
 			{
-
+				portalCamera->GetComponent<Camera>().ClearObliqueMatrixData();
 			}
 			TestEnt->GetComponent<Transform>().SetPosition(camSpacePos);
 		}
@@ -281,14 +288,14 @@ void PortalManagerCore::OnStart()
 		BluePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
 
 		// Debug camera view
-		{
-			portalCamera.SetScale({ .1f, .1f, .3f });
-			Vector3 diffuseColor = { 0.f, .82f, 1.f };
-			DiffuseMaterial* mat = new DiffuseMaterial();
-			Mesh& meshComp = BluePortalCamera->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
-			meshComp.MeshMaterial->DiffuseColor = diffuseColor;
-			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
-		}
+// 		{
+// 			portalCamera.SetScale({ .1f, .1f, .3f });
+// 			Vector3 diffuseColor = { 0.f, .82f, 1.f };
+// 			DiffuseMaterial* mat = new DiffuseMaterial();
+// 			Mesh& meshComp = BluePortalCamera->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+// 			meshComp.MeshMaterial->DiffuseColor = diffuseColor;
+// 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
+// 		}
 	}
 	{
 		OrangePortalCamera = world->CreateEntity();
@@ -299,15 +306,15 @@ void PortalManagerCore::OnStart()
 		OrangePortalTexture = std::make_shared<Moonlight::Texture>(nullptr);
 
 		// Debug camera view
-		{
-			portalCamera.SetScale({ .1f, .1f, .3f });
-			Vector3 diffuseColor = { 1.f, .5f, 0.f };
-
-			DiffuseMaterial* mat = new DiffuseMaterial();
-			Mesh& meshComp = OrangePortalCamera->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
-			meshComp.MeshMaterial->DiffuseColor = diffuseColor;
-			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
-		}
+// 		{
+// 			portalCamera.SetScale({ .1f, .1f, .3f });
+// 			Vector3 diffuseColor = { 1.f, .5f, 0.f };
+// 
+// 			DiffuseMaterial* mat = new DiffuseMaterial();
+// 			Mesh& meshComp = OrangePortalCamera->AddComponent<Mesh>(Moonlight::MeshType::Cube, mat);
+// 			meshComp.MeshMaterial->DiffuseColor = diffuseColor;
+// 			meshComp.MeshMaterial->SetTexture(Moonlight::TextureType::Diffuse, defaultDiffuse);
+// 		}
 	}
 	{
 		TestEnt = world->CreateEntity();

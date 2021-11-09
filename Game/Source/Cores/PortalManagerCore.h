@@ -43,7 +43,7 @@ private:
 	SharedPtr<Moonlight::Texture> OrangePortalTexture;
 	EntityHandle TestEnt;
 
-	float ObliquePlaneOffset = -0.2f;
+	float ObliquePlaneOffset = -0.05f;
 };
 
 ME_REGISTER_CORE(PortalManagerCore)

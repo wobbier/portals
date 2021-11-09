@@ -122,37 +122,34 @@ void CharacterCore::HandleMouseLook(float dt)
 	float YOffest = ((currentState.y) * LookSensitivity) * dt;
 
 	float Yaw = m_camera->Yaw -= XOffset;
-	float Pitch = m_camera->Pitch += YOffest;
+	float Pitch = m_camera->Pitch + YOffest;
 
 	if (Pitch > 89.0f)
 		Pitch = 89.0f;
 	if (Pitch < -89.0f)
 		Pitch = -89.0f;
-
-	Vector3 Front;
-	Front.x = (cos(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
-	Front.y = (sin(Mathf::Radians(Pitch)));
-	Front.z = (sin(Mathf::Radians(Yaw - 90.0f)) * cos(Mathf::Radians(Pitch)));
+	m_camera->Pitch = Pitch;
 
 	m_cameraTransform->SetRotation(Vector3(Pitch, 0.0f, 0.0f));
 	m_playerTransform->SetRotation(Vector3(0.0f, -Yaw, 0.0f));
+	Vector3 Front = m_playerTransform->Front();
 
 	if (input.IsKeyDown(KeyCode::W))
 	{
-		m_controller->Walk(Front.Cross(Vector3::Up).Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(Front.Normalized() * m_movementSpeed * dt);
 	}
 	if (input.IsKeyDown(KeyCode::S))
 	{
-		m_controller->Walk(Front.Cross(Vector3::Up).Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(-Front.Normalized() * m_movementSpeed * dt);
 	}
 
 	if (input.IsKeyDown(KeyCode::D))
 	{
-		m_controller->Walk(Front.Cross(Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(m_playerTransform->Right().Normalized() * m_movementSpeed * dt);
 	}
 	if (input.IsKeyDown(KeyCode::A))
 	{
-		m_controller->Walk(Front.Cross(-Vector3::Up).Normalized() * m_movementSpeed * dt);
+		m_controller->Walk(-m_playerTransform->Right().Normalized() * m_movementSpeed * dt);
 	}
 	if (input.IsKeyDown(KeyCode::Space))
 	{
@@ -235,7 +232,7 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 		//Quaternion q;
 		//q.SetLookRotation(normal);
 		//hitEntTransform.SetRotation(q);
-		//hitEntTransform.LookAt(normal.Normalized());
+		hitEntTransform.LookAt(normal.Normalized());
 		//hitEntTransform.Rotate(Vector3(90.f, 0.f, 0.f), TransformSpace::Self);
 	}
 	Portal& portal = hitEnt->AddComponent<Portal>(IsBluePortal ? Portal::PortalType::Blue : Portal::PortalType::Orange);
@@ -256,11 +253,15 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 		diffuseColor = { 1.f, .5f, 0.f };
 	}
 
+	const float portalWidth = 2.1f;
+	const float portalHeight = 4.2f;
+	const float portalDepth = 0.1f;
+
 	// Portal Border
 	{
 		auto borderEnt = GameWorld->CreateEntity();
 		Transform& hitEntMeshTrans2 = borderEnt->AddComponent<Transform>("BorderTop");
-		hitEntMeshTrans2.SetScale(Vector3(2.1f, .1f, 0.5f));
+		hitEntMeshTrans2.SetScale(Vector3(portalWidth, .1f, portalDepth));
 		hitEntMeshTrans2.SetPosition({0.f, 4.1f, 0.f});
 		hitEntMeshTrans2.SetParent(hitEntTransform);
 
@@ -275,7 +276,7 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 	{
 		auto borderEnt = GameWorld->CreateEntity();
 		Transform& hitEntMeshTrans2 = borderEnt->AddComponent<Transform>("BorderLeft");
-		hitEntMeshTrans2.SetScale(Vector3(.1f, 4.2f, 0.5f));
+		hitEntMeshTrans2.SetScale(Vector3(.1f, portalHeight, portalDepth));
 		hitEntMeshTrans2.SetPosition({ -2.1f, 0.f, 0.f });
 		hitEntMeshTrans2.SetParent(hitEntTransform);
 
@@ -290,7 +291,7 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 	{
 		auto borderEnt = GameWorld->CreateEntity();
 		Transform& hitEntMeshTrans2 = borderEnt->AddComponent<Transform>("BorderRight");
-		hitEntMeshTrans2.SetScale(Vector3(.1f, 4.2f, 0.5f));
+		hitEntMeshTrans2.SetScale(Vector3(.1f, portalHeight, portalDepth));
 		hitEntMeshTrans2.SetPosition({ 2.1f, 0.f, 0.f });
 		hitEntMeshTrans2.SetParent(hitEntTransform);
 
@@ -306,7 +307,7 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 	{
 		auto hitEntMesh = GameWorld->CreateEntity();
 		Transform& hitEntMeshTrans = hitEntMesh->AddComponent<Transform>("Mesh");
-		hitEntMeshTrans.SetScale(Vector3(2.f, 4.f, 0.1f));
+		hitEntMeshTrans.SetScale(Vector3(2.f, 4.f, 0.045f));
 		hitEntMeshTrans.SetParent(hitEntTransform);
 
 		PortalMaterial* mat = new PortalMaterial();
