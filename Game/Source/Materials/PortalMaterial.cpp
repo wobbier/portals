@@ -26,3 +26,9 @@ SharedPtr<Moonlight::Material> PortalMaterial::CreateInstance()
 	return std::make_shared<PortalMaterial>(*this);
 }
 
+uint64_t PortalMaterial::GetRenderState(uint64_t state) const
+{
+	state &= ~(BGFX_STATE_CULL_CCW);
+	return state;
+}
+

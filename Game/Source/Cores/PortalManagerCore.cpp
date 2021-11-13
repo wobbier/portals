@@ -16,6 +16,8 @@
 #include "Window/IWindow.h"
 #include <Materials/DiffuseMaterial.h>
 #include "Components/PortalTraveller.h"
+#include <SDL_stdinc.h>
+#include "Components/Physics/CharacterController.h"
 
 PortalManagerCore::PortalManagerCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Portal>())
@@ -110,19 +112,22 @@ void PortalManagerCore::OnEditorInspect()
 
 void PortalManagerCore::Update(float dt)
 {
-	if(BluePortal && OrangePortal)
+	if (BluePortal && OrangePortal)
 	{
 		Portal& bluePortalComp = BluePortal.GetComponent<Portal>();
-// 		if (bluePortalComp.Travellers.empty())
-// 		{
-// 			auto& mainCam = Camera::CurrentCamera->Parent;
-// 			auto& playerObject = *mainCam->GetComponent<Transform>().GetParentTransform()->Parent.Get();
-// 			playerObject.GetComponent<PortalTraveller>().PreviousOffsetFromPortal = playerObject.GetComponent<Transform>().GetWorldPosition() - BluePortal.GetComponent<Transform>().GetWorldPosition();
-// 			bluePortalComp.Travellers.push_back(playerObject);
-// 		}
-// 		HandleTravelling(BluePortal, OrangePortal);
+		Portal& orangePortalComp = OrangePortal.GetComponent<Portal>();
+		 		if (bluePortalComp.Travellers.empty() && GetEngine().GetInput().WasKeyPressed(KeyCode::R))
+		 		{
+		 			auto& mainCam = Camera::CurrentCamera->Parent;
+		 			auto& playerObject = *mainCam->GetComponent<Transform>().GetParentTransform()->Parent.Get();
+		 			playerObject.GetComponent<PortalTraveller>().PreviousOffsetFromPortal = playerObject.GetComponent<Transform>().GetWorldPosition() - BluePortal.GetComponent<Transform>().GetWorldPosition();
+		 			bluePortalComp.Travellers.push_back(playerObject);
+		 		}
+		 		HandleTravelling(BluePortal, OrangePortal);
 		HandleCamera(BluePortal, OrangePortal, OrangePortalCamera);
 		HandleCamera(OrangePortal, BluePortal, BluePortalCamera);
+		//ProtectScreenFromClipping(BluePortal.GetComponent<Transform>(),);
+		//ProtectScreenFromClipping(OrangePortal.GetComponent<Transform>());
 	}
 }
 
@@ -147,7 +152,9 @@ void PortalManagerCore::HandleTravelling(Entity& primaryPortal, Entity& otherPor
 			{
 				transform.SetWorldPosition(m.GetPosition());
 				transform.SetWorldRotation(m.GetRotation());
+				it.GetComponent<CharacterController>().Teleport(m.GetPosition(), m.GetRotation());
 				primaryPortal.GetComponent<Portal>().Travellers.clear();
+				//otherPortal.GetComponent<Portal>().Travellers.push_back(it);
 				return;
 			}
 			else
@@ -165,108 +172,74 @@ void PortalManagerCore::HandleCamera(Entity& primaryPortal, Entity& otherPortal,
 	Portal& portal = primaryPortal.GetComponent<Portal>();
 
 	auto& mainCam = Camera::CurrentCamera->Parent;
-	//if (false)
+	Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
+	Transform& otherPortalTransform = otherPortal.GetComponent<Transform>();
+
+	Matrix4 cameraMatrix = Matrix4(
+		primaryPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix()
+		*
+		otherPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix()
+		*
+		mainCam->GetComponent<Transform>().GetLocalToWorldMatrix().GetInternalMatrix()
+	);
+
+	//transform.SetWorldTransform(cameraMatrix);
+	transform.SetPosition(cameraMatrix.GetPosition());
+	transform.SetRotation(cameraMatrix.GetRotation());
+
+	// Oblique Matrix
 	{
-		Transform& primaryPortalTransform = primaryPortal.GetComponent<Transform>();
-		Transform& otherPortalTransform = otherPortal.GetComponent<Transform>();
-		//primaryPortalTransform.UpdateWorldTransform();
-		//otherPortalTransform.UpdateWorldTransform();
+		int dot = Mathf::Sign(primaryPortalTransform.Front().Dot(primaryPortalTransform.GetWorldPosition() - transform.GetWorldPosition()));
 
-		Matrix4 cameraMatrix = Matrix4(
-			primaryPortalTransform.GetLocalToWorldMatrix().GetInternalMatrix()
-			* 
-			otherPortalTransform.GetWorldToLocalMatrix().GetInternalMatrix()
-			* 
-			mainCam->GetComponent<Transform>().GetLocalToWorldMatrix().GetInternalMatrix()
-		);// ;
+		// SOOOOOOOOOOOO The CameraCore will eventually set the Camera::CameraToWorld matrix, but we need it NOW...
+		Vector3 eye = transform.GetWorldPosition();
+		Vector3 at = transform.GetWorldPosition() + transform.Front();
+		Vector3 up = transform.Up();
 
-		//transform.SetWorldTransform(cameraMatrix);
-		transform.SetPosition(cameraMatrix.GetPosition());
-		transform.SetRotation(cameraMatrix.GetRotation());
+		Matrix4 camShit = Matrix4(glm::lookAtLH(eye.InternalVector, at.InternalVector, up.InternalVector));
 
-		// Testing Near Plane
+		Vector3 camSpacePos = camShit.TransformPoint(primaryPortalTransform.GetWorldPosition());
+		Vector3 camSpaceNormal = camShit.TransformVector(primaryPortalTransform.Front()) * dot;
+		float camSpaceDst = -camSpacePos.Dot(camSpaceNormal) + ObliquePlaneOffset;
+
+		if (Mathf::Abs(camSpaceDst) > 0.2f)
 		{
-			Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
-			//offset = (primaryPortal.GetComponent<Transform>().GetWorldPosition() - offset);
-			//offset.SetY(portal.Observer->GetWorldPosition().Y());
-			Vector3 offset2 = portal.Observer->GetWorldPosition() - primaryPortal.GetComponent<Transform>().GetWorldPosition();
-			//transform.SetWorldPosition(offset);
-			//portalCamera->GetComponent<Camera>().Near = Mathf::Abs(offset.Length());// .Dot(primaryPortal.GetComponent<Transform>().Front()));
+			glm::vec4 clipPlaneCameraSpace = glm::vec4(camSpaceNormal.x, camSpaceNormal.y, camSpaceNormal.z, camSpaceDst);
+			portalCamera->GetComponent<Camera>().SetObliqueMatrixData(clipPlaneCameraSpace);
 		}
-
-		// Oblique Matrix
+		else
 		{
-			int dot = Mathf::Sign(primaryPortalTransform.Front().Dot(primaryPortalTransform.GetWorldPosition() - transform.GetWorldPosition()));
-
-			// SOOOOOOOOOOOO The CameraCore will eventually set the Camera::CameraToWorld matrix, but we need it NOW...
-			Vector3 eye = transform.GetWorldPosition();
-			Vector3 at = transform.GetWorldPosition() + transform.Front();
-			Vector3 up = transform.Up();
-
-			Matrix4 camShit = Matrix4(glm::lookAtLH(eye.InternalVector, at.InternalVector, up.InternalVector));
-
-			Vector3 camSpacePos = camShit.TransformPoint(primaryPortalTransform.GetWorldPosition());
-			Vector3 camSpaceNormal = camShit.TransformVector(primaryPortalTransform.Front()) * dot;
-			float camSpaceDst = -camSpacePos.Dot(camSpaceNormal) + ObliquePlaneOffset;
-
-			if (Mathf::Abs(camSpaceDst) > 0.2f)
-			{
-				glm::vec4 clipPlaneCameraSpace = glm::vec4(camSpaceNormal.x, camSpaceNormal.y, camSpaceNormal.z, camSpaceDst);
-				portalCamera->GetComponent<Camera>().SetObliqueMatrixData(clipPlaneCameraSpace);
-			}
-			else
-			{
-				portalCamera->GetComponent<Camera>().ClearObliqueMatrixData();
-			}
-			TestEnt->GetComponent<Transform>().SetPosition(camSpacePos);
+			portalCamera->GetComponent<Camera>().ClearObliqueMatrixData();
 		}
-
-		Transform* ttt = primaryPortalTransform.GetChildByName("Mesh");
-		if (ttt && ttt->Parent->HasComponent<Mesh>())
-		{
-			Mesh& meshComp = ttt->Parent->GetComponent<Mesh>();
-			Moonlight::CameraData* CamData = GetEngine().GetRenderer().GetCameraCache().Get(Camera::CurrentCamera->GetCameraId());
-
-			static_cast<PortalMaterial*>(meshComp.MeshMaterial.get())->ScreenSize = GetEngine().GetWindow()->GetSize();// Vector2(OrangePortalTexture->mWidth, OrangePortalTexture->mHeight);// Vector2(mainCam.OutputSize.x / CamData->Buffer->Width, cam.OutputSize.y / CamData->Buffer->Height);
-		}
+		TestEnt->GetComponent<Transform>().SetPosition(camSpacePos);
 	}
-	//if(false)
-	//{
-	//	Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
-	//	offset = (primaryPortal.GetComponent<Transform>().GetWorldPosition() - offset);
-	//	offset.SetY(portal.Observer->GetWorldPosition().Y());
-	//	Vector3 offset2 = portal.Observer->GetWorldPosition() - primaryPortal.GetComponent<Transform>().GetWorldPosition();
-	//	transform.SetWorldPosition(offset);
 
+	Transform* ttt = primaryPortalTransform.GetChildByName("Mesh");
+	if (ttt && ttt->Parent->HasComponent<Mesh>())
+	{
+		Mesh& meshComp = ttt->Parent->GetComponent<Mesh>();
+		Moonlight::CameraData* CamData = GetEngine().GetRenderer().GetCameraCache().Get(Camera::CurrentCamera->GetCameraId());
 
-	//	float thing = 0;
-	//	float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
+		// Should be OutputSize?
+		static_cast<PortalMaterial*>(meshComp.MeshMaterial.get())->ScreenSize = GetEngine().GetWindow()->GetSize();
+	}
+	ProtectScreenFromClipping(primaryPortalTransform, mainCam->GetComponent<Transform>().GetWorldPosition());
+}
 
-	//	Quaternion portalRotationDistance = Quaternion::AngleAxis(180.0f, Vector3::Up);
-	//	Vector3 newCameraDirection =  portalRotationDistance* transform.Front();
+float PortalManagerCore::ProtectScreenFromClipping(Transform& portal, const Vector3& viewPoint)
+{
+	auto& mainCam = Camera::CurrentCamera->Parent;
+	const float halfHeight = Camera::CurrentCamera->Near * std::tan(Camera::CurrentCamera->GetFOV() * .5f * (M_PI / 180.f));
+	const float halfWidth = halfHeight * Camera::CurrentCamera->GetAspectRatio();
+	const float dstToNearClipPlaneCorner = Vector3(halfWidth, halfHeight, Camera::CurrentCamera->Near).Length();
+	const float screenThickness = dstToNearClipPlaneCorner;
 
-	//	Vector3 forward = newCameraDirection;// (portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition()).Normalized();// primaryPortal.GetComponent<Transform>().GetPo - t_camera).normalized();
+	Transform* portalMesh = portal.GetChildByName("Mesh");
+	bool camFacingSameDirAsPortal = portal.Front().Dot(portal.GetWorldPosition() - viewPoint) > 0.f;
+	portalMesh->SetScale({portalMesh->GetScale().x, portalMesh->GetScale().y, screenThickness});
+	portalMesh->SetPosition(Vector3::Front * screenThickness * ((camFacingSameDirAsPortal) ? .5f : -.5f));
 
-	//	portalCamera->GetComponent<Camera>().Near = Mathf::Abs(offset2.Dot(primaryPortal.GetComponent<Transform>().Front()));
-
-	//	transform.LookAt(forward);
-	//}
-	//if (false)
-	//{
-	//	Vector3 offset = portal.Observer->GetWorldPosition() - otherPortal.GetComponent<Transform>().GetWorldPosition();
-
-	//	transform.SetWorldPosition(primaryPortal.GetComponent<Transform>().GetWorldPosition() + offset);
-
-	//	float thing = 0;
-	//	float difference = Quaternion::Angle(primaryPortal.GetComponent<Transform>().InternalRotation, otherPortal.GetComponent<Transform>().InternalRotation);// DirectX::Angle//DirectX::XMQuaternionToAxisAngle(Vector3::Up.GetInternalVec(), &thing, );
-
-	//	Quaternion portalRotationDistance = Quaternion::AngleAxis(difference, Vector3::Up);
-	//	Vector3 newCameraDirection = portalRotationDistance * transform.Front();
-
-	//	Vector3 forward = newCameraDirection.Normalized();
-
-	//	transform.LookAt(forward);
-	//}
+	return screenThickness;
 }
 
 void PortalManagerCore::Init()

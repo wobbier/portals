@@ -33,6 +33,8 @@ private:
 	void HandleTravelling(Entity& primaryPortal, Entity& otherPortal);
 	void HandleCamera(Entity& primaryPortal, Entity& otherPortal, EntityHandle& portalCamera);
 
+	float ProtectScreenFromClipping(Transform& portal, const Vector3& viewPoint);
+
 	EntityHandle BluePortalCamera;
 	EntityHandle OrangePortalCamera;
 

@@ -221,7 +221,7 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 {
 	auto hitEnt = GameWorld->CreateEntity();
 	Transform& hitEntTransform = hitEnt->AddComponent<Transform>("Portal");
-	hitEntTransform.SetWorldPosition(position + (normal * 2.f));
+	hitEntTransform.SetWorldPosition(position + Vector3( 0.f, 4.f, 0.f ));
 
 	if (normal.y >= 0.98f)
 	{
@@ -307,7 +307,7 @@ void CharacterCore::SpawnPortal(Vector3 position, Vector3 normal, bool IsBluePor
 	{
 		auto hitEntMesh = GameWorld->CreateEntity();
 		Transform& hitEntMeshTrans = hitEntMesh->AddComponent<Transform>("Mesh");
-		hitEntMeshTrans.SetScale(Vector3(2.f, 4.f, 0.045f));
+		hitEntMeshTrans.SetScale(Vector3(2.f, 4.f, 1.f));
 		hitEntMeshTrans.SetParent(hitEntTransform);
 
 		PortalMaterial* mat = new PortalMaterial();

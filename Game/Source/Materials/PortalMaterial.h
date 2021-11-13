@@ -18,6 +18,8 @@ public:
 	bgfx::UniformHandle s_diffuse;
 	bgfx::UniformHandle s_tiling;
 	bgfx::UniformHandle s_screenSize;
+
+	uint64_t GetRenderState(uint64_t state) const final;
 };
 
 ME_REGISTER_MATERIAL_NAME_FOLDER(PortalMaterial, "Portal", "Game");
