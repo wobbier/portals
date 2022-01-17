@@ -10,7 +10,7 @@
 #include "Math/Vector3.h"
 #include "Components/Graphics/Mesh.h"
 #include "Engine/Engine.h"
-#include "Cores/SceneGraph.h"
+#include "Cores/SceneCore.h"
 #include "Components/Camera.h"
 #include "Mathf.h"
 #include "Components/Physics/CharacterController.h"

@@ -14,7 +14,7 @@
 #include "Components/Physics/CharacterController.h"
 #include "CLog.h"
 #include "Cores/PhysicsCore.h"
-#include "Cores/SceneGraph.h"
+#include "Cores/SceneCore.h"
 #include "Components/Graphics/Model.h"
 #include "Components/Physics/Rigidbody.h"
 #include "Components/Graphics/Mesh.h"
