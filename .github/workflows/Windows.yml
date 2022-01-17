@@ -1,0 +1,120 @@
+name: Windows
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-2019]
+        buildconfig: [Editor_Release, Game_Win64_Release]
+        include:
+          - os: windows-2019
+            shell: cmd
+            compiler: cl
+            target: Windows
+
+    steps:
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Check out repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: change dirs
+        run: |
+          ls
+          
+      - name: Generate a new project
+        shell: cmd
+        run: |
+          cd Engine/ThirdParty
+          call GenerateSolutions.bat
+          cd ../../
+
+      - name: Generate a new project
+        shell: cmd
+        run: cd Project && call GenerateSolution.bat && cd ../
+
+      - name: Compile Tools
+        if: ${{ matrix.buildconfig == 'Game_Win64_Release' }}
+        shell: cmd
+        run: msbuild /property:Configuration="Editor_Release"
+
+      - name: Compile Project
+        shell: cmd
+        run: msbuild /property:Configuration="${{matrix.buildconfig}}"
+
+      - name: Copy Assets
+        shell: cmd
+        run: call CopyAssets.bat
+
+      - name: Copy Editor Assets
+        if: ${{ matrix.buildconfig == 'Editor_Release' }}
+        shell: cmd
+        continue-on-error: true
+        run: |
+          robocopy ".build/Release/Assets" ".build\\Editor_Release\\Assets" *.* /w:0 /r:1 /v /E
+          robocopy "Engine/Tools" ".build\\Editor_Release\\Tools" Optick.exe /w:0 /r:1 /v /E
+          robocopy "Engine/Tools/Win64" ".build\\Editor_Release\\Tools\\Win64" *.* /w:0 /r:1 /v /E
+
+      - name: Archive Editor
+        if: ${{ matrix.buildconfig == 'Editor_Release' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Portals v${{github.run_number}} - Editor
+          path: |
+            .build/${{matrix.buildconfig}}
+            !.build/${{matrix.buildconfig}}/AppX
+            !.build/${{matrix.buildconfig}}/Tools
+            !.build/${{matrix.buildconfig}}/*.lib
+            !.build/${{matrix.buildconfig}}/*.pdb
+            !.build/${{matrix.buildconfig}}/*.exp
+            !.build/${{matrix.buildconfig}}/*.map
+            !.build/${{matrix.buildconfig}}/*.log
+            .build/${{matrix.buildconfig}}/Tools/Optick.exe
+            .build/${{matrix.buildconfig}}/Tools/Win64/*.*
+
+      - name: Cook Assets
+        if: ${{ matrix.buildconfig == 'Game_Win64_Release' }}
+        shell: cmd
+        run: |
+          cd ".build/Editor_Release/"
+          call Havana.exe -CompileAssets
+          cd ../../
+
+      - name: Copy Cooked Assets
+        if: ${{ matrix.buildconfig == 'Game_Win64_Release' }}
+        shell: cmd
+        continue-on-error: true
+        run: |
+          robocopy ".build/Editor_Release/Assets" ".build\\Game_Win64_Release\\Assets" *.* /w:0 /r:1 /v /E
+
+      - name: Archive Build
+        if: ${{ matrix.buildconfig == 'Game_Win64_Release' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Portals v${{github.run_number}} - ${{matrix.buildconfig}}
+          path: |
+            .build/${{matrix.buildconfig}}
+            .build/${{matrix.buildconfig}}/Assets
+            !.build/${{matrix.buildconfig}}/AppX
+            !.build/${{matrix.buildconfig}}/*.lib
+            !.build/${{matrix.buildconfig}}/*.pdb
+            !.build/${{matrix.buildconfig}}/*.exp
+            !.build/${{matrix.buildconfig}}/*.log
+            !.build/${{matrix.buildconfig}}/**/*.png
+            !.build/${{matrix.buildconfig}}/**/*.jpg
+            !.build/${{matrix.buildconfig}}/**/*.frag
+            !.build/${{matrix.buildconfig}}/**/*.vert
+            !.build/${{matrix.buildconfig}}/**/*.var
+            !.build/${{matrix.buildconfig}}/**/*.sh

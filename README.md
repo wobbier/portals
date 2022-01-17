@@ -1,9 +1,9 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/dy75dhkwnchrrjcy?svg=true)](https://ci.appveyor.com/project/wobbier/stack)
 ![license](https://img.shields.io/github/license/wobbier/mitchgame.svg)
 ======
-This is an implementation of the game stack using the [MitchEngine][2].
+This is an implementation of portal mechanics using the [MitchEngine][2].
 
-![Progress Pic](https://raw.githubusercontent.com/wobbier/stack/master/GitHub/Stack.png)
+![Progress Pic](https://raw.githubusercontent.com/wobbier/portals/master/.github/progress.png)
 
 Getting Started
 -----------------------
