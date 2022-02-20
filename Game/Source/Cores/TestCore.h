@@ -17,7 +17,7 @@ public:
 	virtual void OnEditorInspect() override;
 #endif
 
-	virtual void Update(float dt) override;
+	virtual void Update(const UpdateContext& inUpdateContext) override;
 
 	virtual void Init() override;
 	void OnStart() override;

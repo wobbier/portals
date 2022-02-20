@@ -26,7 +26,7 @@ void TestCore::OnEditorInspect()
 }
 #endif
 
-void TestCore::Update(float dt)
+void TestCore::Update(const UpdateContext& inUpdateContext)
 {
 }
 

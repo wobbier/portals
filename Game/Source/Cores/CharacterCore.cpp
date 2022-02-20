@@ -26,27 +26,27 @@
 CharacterCore::CharacterCore()
 	: Base(ComponentFilter().Requires<Transform>().Requires<Character>().Requires<CharacterController>())
 {
-	m_bluePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_blue1.wav");
-	m_orangePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_red1.wav");
-
-	m_invalidPortalSounds.reserve(4);
-	for (int i = 0; i < 4; ++i)
-	{
-		m_invalidPortalSounds.push_back(new AudioSource("Assets/Sounds/Gun/portal_invalid_surface_0" + std::to_string(i + 1) + ".wav"));
-	}
-
-	AudioCore* audioCore = static_cast<AudioCore*>(GetEngine().GetWorld().lock()->GetCore(AudioCore::GetTypeId()));
-	audioCore->InitComponent(*m_bluePortalShot);
-	audioCore->InitComponent(*m_orangePortalShot);
-
-	for (int i = 0; i < m_invalidPortalSounds.size(); ++i)
-	{
-		audioCore->InitComponent(*m_invalidPortalSounds[i]);
-	}
 }
 
 void CharacterCore::Init()
 {
+    m_bluePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_blue1.wav");
+    m_orangePortalShot = new AudioSource("Assets/Sounds/portalgun_shoot_red1.wav");
+
+    m_invalidPortalSounds.reserve(4);
+    for (int i = 0; i < 4; ++i)
+    {
+        m_invalidPortalSounds.push_back(new AudioSource("Assets/Sounds/Gun/portal_invalid_surface_0" + std::to_string(i + 1) + ".wav"));
+    }
+
+    AudioCore* audioCore = static_cast<AudioCore*>(GetEngine().GetWorld().lock()->GetCore(AudioCore::GetTypeId()));
+    audioCore->InitComponent(*m_bluePortalShot);
+    audioCore->InitComponent(*m_orangePortalShot);
+
+    for (int i = 0; i < m_invalidPortalSounds.size(); ++i)
+    {
+        audioCore->InitComponent(*m_invalidPortalSounds[i]);
+    }
 }
 
 void CharacterCore::OnEntityAdded(Entity& NewEntity)
@@ -69,10 +69,10 @@ void CharacterCore::OnEntityRemoved(Entity& InEntity)
 {
 }
 
-void CharacterCore::Update(float dt)
+void CharacterCore::Update(const UpdateContext& inUpdateContext)
 {
 	HandlePortalShots();
-	HandleMouseLook(dt);
+	HandleMouseLook(inUpdateContext.GetDeltaTime());
 	return;
 }
 

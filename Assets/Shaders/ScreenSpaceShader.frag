@@ -23,7 +23,7 @@ void main()
 
 	float2 coords = float2(texCoord.x, -texCoord.y);
 	float2 scale = u_viewRect.zw / s_screenSize.xy;
-	vec2 uvs = (0.5f * coords + 0.5f);// * s_tiling.xy;
+	vec2 uvs = (0.5f * coords + 0.5f) * s_tiling.xy;
 	uvs = uvs * scale;
 	vec4 color = texture2D(s_texDiffuse, uvs) * s_diffuse;
 

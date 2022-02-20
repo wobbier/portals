@@ -144,7 +144,7 @@
                     ],
                     "Rotation": [
                         -9.569530084263533e-05,
-                        0.046523600816726685,
+                        0.04652360454201698,
                         0.0005666050710715353
                     ],
                     "Scale": [
@@ -755,61 +755,6 @@
                     ],
                     "DestroyOnLoad": true,
                     "Name": "Ground"
-                },
-                {
-                    "Components": [
-                        {
-                            "Position": [
-                                0.0,
-                                12.128999710083008,
-                                0.0
-                            ],
-                            "Rotation": [
-                                0.0,
-                                -0.0,
-                                0.0
-                            ],
-                            "Scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "Type": "Transform"
-                        },
-                        {
-                            "Material": {
-                                "DiffuseColor": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "Tiling": [
-                                    1.0,
-                                    1.0
-                                ],
-                                "Type": "DiffuseMaterial"
-                            },
-                            "MeshType": "Model",
-                            "Type": "Mesh"
-                        },
-                        {
-                            "ColliderType": "Box",
-                            "IsEventsEnabled": false,
-                            "Mass": 10.0,
-                            "Scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "Type": "Rigidbody"
-                        },
-                        {
-                            "ModelPath": "Assets/Cube.fbx",
-                            "Type": "Model"
-                        }
-                    ],
-                    "DestroyOnLoad": true,
-                    "Name": "Box"
                 }
             ],
             "Components": [

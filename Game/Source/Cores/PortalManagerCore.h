@@ -4,11 +4,13 @@
 #include "Pointers.h"
 #include "Components/Transform.h"
 #include "ECS/EntityHandle.h"
+#include "Events/EventReceiver.h"
 
 namespace Moonlight { class Texture; }
 
 class PortalManagerCore
 	: public Core<PortalManagerCore>
+	, public EventReceiver
 {
 public:
 	PortalManagerCore();
@@ -20,8 +22,11 @@ public:
 	void OnEditorInspect() override;
 #endif
 
-	void Update(float dt) override;
+	void Update(const UpdateContext& inUpdateContext) override;
 
+
+
+	bool OnEvent(const BaseEvent& evt) override;
 
 private:
 	void Init() override;
@@ -45,7 +50,7 @@ private:
 	SharedPtr<Moonlight::Texture> OrangePortalTexture;
 	EntityHandle TestEnt;
 
-	float ObliquePlaneOffset = -0.05f;
+	float ObliquePlaneOffset = -0.09f;
 };
 
 ME_REGISTER_CORE(PortalManagerCore)

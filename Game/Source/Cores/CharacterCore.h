@@ -21,7 +21,7 @@ public:
 
 	virtual void OnEntityRemoved(Entity& InEntity) override;
 
-	virtual void Update(float dt) override;
+	virtual void Update(const UpdateContext& inUpdateContext) override;
 
 #if ME_EDITOR
 	virtual void OnEditorInspect() override;

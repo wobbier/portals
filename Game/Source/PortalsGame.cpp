@@ -31,7 +31,7 @@ void PortalsGame::OnStart()
 {
 }
 
-void PortalsGame::OnUpdate(float DeltaTime)
+void PortalsGame::OnUpdate(const UpdateContext& inUpdateContext)
 {
 	Input& Instance = GetEngine().GetInput();
 }
